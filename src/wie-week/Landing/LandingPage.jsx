@@ -122,8 +122,7 @@ const INSTRUCTIONS = [
 /* helpers removed: scrollTo and useRevealOnScroll were unused and caused linter warnings */
 
 /* ── Main Component ── */
-export default function LandingPage() {
-  const navigate = useNavigate();
+export default function LandingPage({ onStart }) {
   return (
     <div className="lp-root">
       <GlobalStars />
@@ -142,7 +141,7 @@ export default function LandingPage() {
           <div className="hero-spacer" />
           <div className="hero-bottom">
             <div className="hero-btns">
-              <button className="btn-pixel" id="btn-start-playing" onClick={() => navigate('/round1')}>Start Playing</button>
+              <button className="btn-pixel" id="btn-start-playing" onClick={onStart}>Start Playing</button>
               <button className="btn-pixel" id="btn-how-to-play">How to Play</button>
             </div>
             <img src={dotsImg} alt="Slide indicators" className="hero-dots-img" />
@@ -248,7 +247,7 @@ export default function LandingPage() {
           </ul>
           {/* Tasks Awaits sits at the bottom of this section */}
           <div className="tasks-cta">
-            <button className="btn-cta" id="btn-tasks-awaits" onClick={() => navigate('/round1')}>Tasks Awaits</button>
+            <button className="btn-cta" id="btn-tasks-awaits" onClick={onStart}>Tasks Awaits</button>
           </div>
         </div>
       </section>

@@ -1,15 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { getRound1Questions } from '../api';
 import './round1.css';
-import adminRoom  from './assets/admin_roombg.png';
-import crewBlue   from './assets/crewmate_blue.png';
-import crewGreen  from './assets/crewmate_green.png';
-import crewRed    from './assets/crewmate_red.png';
+import adminRoom from './assets/admin_roombg.png';
+import crewBlue from './assets/crewmate_blue.png';
+import crewGreen from './assets/crewmate_green.png';
+import crewRed from './assets/crewmate_red.png';
 import crewYellow from './assets/crewmate_yellow.png';
 
 const CREW = [crewBlue, crewGreen, crewRed, crewYellow];
-
-
 
 /* ── Starfield ── */
 function Stars({ count = 50 }) {
@@ -60,12 +58,12 @@ function KillCooldown({ seconds = 10 }) {
   );
 }
 
-export default function Round1() {
+export default function Round1({ onComplete }) {
   const [questions, setQuestions] = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [cur, setCur]             = useState(0);
-  const [sel, setSel]             = useState(null);
-  const [answers, setAnswers]     = useState({});
+  const [loading, setLoading] = useState(true);
+  const [cur, setCur] = useState(0);
+  const [sel, setSel] = useState(null);
+  const [answers, setAnswers] = useState({});
 
   useEffect(() => {
     getRound1Questions().then(data => {
@@ -80,9 +78,8 @@ export default function Round1() {
     </div>
   );
 
-  const q     = questions[cur];
+  const q = questions[cur];
   const total = questions.length;
-  const done  = Object.keys(answers).length;
 
   function pick(i) { setSel(i); }
   function next() {
@@ -98,7 +95,7 @@ export default function Round1() {
   }
 
   return (
-    <div className="r1-root">
+    <>
       <div className="r1-layout">
 
         {/* ══ TOP ROW ══ */}
@@ -111,9 +108,9 @@ export default function Round1() {
               <div className="r1-ptitle">⬡ SHIP VITALS</div>
               <div className="r1-vitals">
                 {[
-                  { label: 'O₂',      cls: 'blue',  val: '78%', vcls: 'ok'   },
-                  { label: 'REACTOR', cls: 'green', val: '91%', vcls: 'ok'   },
-                  { label: 'COMMS',   cls: 'red',   val: 'FAIL',vcls: 'crit' },
+                  { label: 'O₂', cls: 'blue', val: '78%', vcls: 'ok' },
+                  { label: 'REACTOR', cls: 'green', val: '91%', vcls: 'ok' },
+                  { label: 'COMMS', cls: 'red', val: 'FAIL', vcls: 'crit' },
                   { label: 'SHIELDS', cls: 'amber', val: '55%', vcls: 'warn' },
                 ].map(({ label, cls, val, vcls }) => (
                   <div className="r1-vrow" key={label}>
@@ -132,13 +129,13 @@ export default function Round1() {
           <div className="r1-glow"><div className="r1-box r1-box--tr">
             <Stars count={35} />
             <div className="r1-panel">
-              <div className="r1-ptitle" style={{textAlign:'center'}}>⬡ SHIP POSITION</div>
+              <div className="r1-ptitle" style={{ textAlign: 'center' }}>⬡ SHIP POSITION</div>
               <div className="r1-tally">
-                <svg style={{width:'100%', flex:1, minHeight:0}} viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet">
-                  {[0,20,40,60,80,100,120].map(x => (
+                <svg style={{ width: '100%', flex: 1, minHeight: 0 }} viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet">
+                  {[0, 20, 40, 60, 80, 100, 120].map(x => (
                     <line key={x} x1={x} y1="0" x2={x} y2="80" stroke="rgba(42,122,170,0.08)" strokeWidth="0.5" />
                   ))}
-                  {[0,20,40,60,80].map(y => (
+                  {[0, 20, 40, 60, 80].map(y => (
                     <line key={y} x1="0" y1={y} x2="120" y2={y} stroke="rgba(42,122,170,0.08)" strokeWidth="0.5" />
                   ))}
                   <ellipse cx="60" cy="40" rx="50" ry="30" fill="none" stroke="rgba(42,122,170,0.12)" strokeWidth="0.6" strokeDasharray="3,3" />
@@ -161,9 +158,9 @@ export default function Round1() {
                     <animateTransform attributeName="transform" type="rotate" from="0 60 40" to="360 60 40" dur="10s" repeatCount="indefinite" />
                   </polygon>
                 </svg>
-                <div style={{display:'flex', justifyContent:'space-between', width:'100%', flexShrink:0}}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', flexShrink: 0 }}>
                   <span className="r1-tsub">SECTOR: SKELD-7</span>
-                  <span className="r1-tsub" style={{color:'#ffaa00'}}>ORBIT ACTIVE</span>
+                  <span className="r1-tsub" style={{ color: '#ffaa00' }}>ORBIT ACTIVE</span>
                 </div>
               </div>
             </div>
@@ -183,25 +180,25 @@ export default function Round1() {
                 <div className="r1-ptitle">⬡ CREW RADAR</div>
                 <div className="r1-radar-wrap">
                   <svg className="r1-radar-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(42,122,170,0.15)" strokeWidth="0.8"/>
-                    <circle cx="50" cy="50" r="32" fill="none" stroke="rgba(42,122,170,0.12)" strokeWidth="0.8"/>
-                    <circle cx="50" cy="50" r="18" fill="none" stroke="rgba(42,122,170,0.1)"  strokeWidth="0.8"/>
-                    <line x1="50" y1="4" x2="50" y2="96" stroke="rgba(42,122,170,0.08)" strokeWidth="0.5"/>
-                    <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(42,122,170,0.08)" strokeWidth="0.5"/>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(42,122,170,0.15)" strokeWidth="0.8" />
+                    <circle cx="50" cy="50" r="32" fill="none" stroke="rgba(42,122,170,0.12)" strokeWidth="0.8" />
+                    <circle cx="50" cy="50" r="18" fill="none" stroke="rgba(42,122,170,0.1)" strokeWidth="0.8" />
+                    <line x1="50" y1="4" x2="50" y2="96" stroke="rgba(42,122,170,0.08)" strokeWidth="0.5" />
+                    <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(42,122,170,0.08)" strokeWidth="0.5" />
                     <g className="r1-rsweep">
-                      <path d="M50,50 L50,4 A46,46 0 0,1 96,50 Z" fill="rgba(57,255,20,0.06)"/>
-                      <line x1="50" y1="50" x2="50" y2="4" stroke="rgba(57,255,20,0.45)" strokeWidth="0.8"/>
+                      <path d="M50,50 L50,4 A46,46 0 0,1 96,50 Z" fill="rgba(57,255,20,0.06)" />
+                      <line x1="50" y1="50" x2="50" y2="4" stroke="rgba(57,255,20,0.45)" strokeWidth="0.8" />
                     </g>
-                    <circle className="r1-rdot" cx="67" cy="28" r="3"   fill="#39ff14"/>
-                    <circle className="r1-rdot" cx="33" cy="70" r="3"   fill="#3a8fc7" style={{animationDelay:'1s'}}/>
-                    <circle className="r1-rdot" cx="75" cy="66" r="3"   fill="#ff4060" style={{animationDelay:'2s'}}/>
-                    <circle className="r1-rdot" cx="26" cy="36" r="2.5" fill="#ffaa00" style={{animationDelay:'0.5s'}}/>
-                    <circle cx="50" cy="50" r="3" fill="#e0f4ff"/>
+                    <circle className="r1-rdot" cx="67" cy="28" r="3" fill="#39ff14" />
+                    <circle className="r1-rdot" cx="33" cy="70" r="3" fill="#3a8fc7" style={{ animationDelay: '1s' }} />
+                    <circle className="r1-rdot" cx="75" cy="66" r="3" fill="#ff4060" style={{ animationDelay: '2s' }} />
+                    <circle className="r1-rdot" cx="26" cy="36" r="2.5" fill="#ffaa00" style={{ animationDelay: '0.5s' }} />
+                    <circle cx="50" cy="50" r="3" fill="#e0f4ff" />
                   </svg>
                 </div>
-                <div className="r1-vrow" style={{flexShrink:0, gap:6}}>
-                  <span className="r1-vlabel" style={{width:'auto'}}>CREW ALIVE</span>
-                  <span className="r1-vval r1-vval--ok" style={{marginLeft:'auto'}}>7 / 10</span>
+                <div className="r1-vrow" style={{ flexShrink: 0, gap: 6 }}>
+                  <span className="r1-vlabel" style={{ width: 'auto' }}>CREW ALIVE</span>
+                  <span className="r1-vval r1-vval--ok" style={{ marginLeft: 'auto' }}>7 / 10</span>
                 </div>
               </div>
             </div></div>
@@ -213,12 +210,12 @@ export default function Round1() {
                 <div className="r1-ptitle">⬡ SABOTAGE LOG</div>
                 <div className="r1-feed">
                   {[
-                    { text: '!! COMMS DOWN',      cls: 'crit' },
-                    { text: '⚠ LIGHTS FLICKER',   cls: 'warn' },
-                    { text: 'O2 NOMINAL',          cls: '' },
-                    { text: '⚠ VENT OPENED',       cls: 'warn' },
-                    { text: 'REACTOR STABLE',      cls: '' },
-                    { text: 'MEDBAY SECURE',       cls: '' },
+                    { text: '!! COMMS DOWN', cls: 'crit' },
+                    { text: '⚠ LIGHTS FLICKER', cls: 'warn' },
+                    { text: 'O2 NOMINAL', cls: '' },
+                    { text: '⚠ VENT OPENED', cls: 'warn' },
+                    { text: 'REACTOR STABLE', cls: '' },
+                    { text: 'MEDBAY SECURE', cls: '' },
                   ].map(({ text, cls }, i) => (
                     <div key={i} className={`r1-fitem${cls ? ` r1-fitem--${cls}` : ''}`}>{text}</div>
                   ))}
@@ -255,25 +252,25 @@ export default function Round1() {
           {/* Right column */}
           <div className="r1-col-side">
 
-            {/* RT — Impostor Scan with real crewmate */}
+            {/* RT — Impostor Scan */}
             <div className="r1-glow"><div className="r1-box r1-box--sr-t">
               <Stars count={20} />
               <div className="r1-panel">
                 <div className="r1-ptitle">⬡ IMPOSTOR SCAN</div>
                 <div className="r1-scan">
                   <div className="r1-scan-rings">
-                    <svg style={{position:'absolute',inset:0,width:'100%',height:'100%'}} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-                      <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(200,30,50,0.1)"  strokeWidth="0.8"/>
-                      <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(200,30,50,0.08)" strokeWidth="0.8"/>
-                      <circle className="r1-pring" cx="50" cy="50" r="6" fill="none" stroke="rgba(255,32,64,0.8)"  strokeWidth="1.2"/>
-                      <circle className="r1-pring" cx="50" cy="50" r="6" fill="none" stroke="rgba(255,32,64,0.5)"  strokeWidth="1"   style={{animationDelay:'0.65s'}}/>
-                      <circle className="r1-pring" cx="50" cy="50" r="6" fill="none" stroke="rgba(255,32,64,0.25)" strokeWidth="0.8" style={{animationDelay:'1.3s'}}/>
+                    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                      <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(200,30,50,0.1)" strokeWidth="0.8" />
+                      <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(200,30,50,0.08)" strokeWidth="0.8" />
+                      <circle className="r1-pring" cx="50" cy="50" r="6" fill="none" stroke="rgba(255,32,64,0.8)" strokeWidth="1.2" />
+                      <circle className="r1-pring" cx="50" cy="50" r="6" fill="none" stroke="rgba(255,32,64,0.5)" strokeWidth="1" style={{ animationDelay: '0.65s' }} />
+                      <circle className="r1-pring" cx="50" cy="50" r="6" fill="none" stroke="rgba(255,32,64,0.25)" strokeWidth="0.8" style={{ animationDelay: '1.3s' }} />
                     </svg>
                     <img src={crewRed} alt="crewmate" className="r1-scan-crew" />
                   </div>
-                  <div className="r1-vrow" style={{flexShrink:0, gap:6, width:'100%'}}>
-                    <span className="r1-vlabel" style={{width:'auto'}}>THREAT LVL</span>
-                    <span className="r1-vval r1-vval--crit" style={{marginLeft:'auto'}}>HIGH</span>
+                  <div className="r1-vrow" style={{ flexShrink: 0, gap: 6, width: '100%' }}>
+                    <span className="r1-vlabel" style={{ width: 'auto' }}>THREAT LVL</span>
+                    <span className="r1-vval r1-vval--crit" style={{ marginLeft: 'auto' }}>HIGH</span>
                   </div>
                 </div>
               </div>
@@ -286,12 +283,12 @@ export default function Round1() {
                 <div className="r1-ptitle">⬡ VENT ACTIVITY</div>
                 <div className="r1-vents">
                   {[
-                    { room: 'CAFETERIA',  active: false },
-                    { room: 'ELECTRICAL', active: true  },
-                    { room: 'MEDBAY',     active: false },
-                    { room: 'STORAGE',    active: false },
-                    { room: 'ADMIN',      active: true  },
-                    { room: 'SHIELDS',    active: false },
+                    { room: 'CAFETERIA', active: false },
+                    { room: 'ELECTRICAL', active: true },
+                    { room: 'MEDBAY', active: false },
+                    { room: 'STORAGE', active: false },
+                    { room: 'ADMIN', active: true },
+                    { room: 'SHIELDS', active: false },
                   ].map(({ room, active }) => (
                     <div key={room} className={`r1-vitem${active ? ' r1-vitem--active' : ''}`}>
                       {room} — {active ? 'MOTION' : 'CLEAR'}
@@ -336,6 +333,24 @@ export default function Round1() {
 
         </div>
       </div>
-    </div>
+
+      {onComplete && (
+        <div style={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 9999 }}>
+          <button
+            onClick={onComplete}
+            style={{
+              fontFamily: "'Press Start 2P',monospace", fontSize: '0.55rem',
+              padding: '0.85rem 1.5rem', borderRadius: '0.75rem',
+              border: '2px solid #38fedc', cursor: 'pointer',
+              background: 'rgba(4,5,15,0.92)', color: '#38fedc',
+              boxShadow: '0 0 20px rgba(56,254,220,0.4)',
+              backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
+            }}
+          >
+            NEXT ROUND →
+          </button>
+        </div>
+      )}
+    </>
   );
 }
