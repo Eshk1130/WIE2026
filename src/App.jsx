@@ -1,26 +1,69 @@
+/**
+ * src/App.jsx
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Root application component for WIE2026 – Crewmate Protocol.
+ *
+ * ── Supabase integration quick-start ────────────────────────────────────────
+ *
+ * The entire app is wrapped in <PlayerProvider> which exposes:
+ *   const { player, sessionId, loading, error, join, leave, submitScore }
+ *     = usePlayerContext();
+ *
+ * HOW TO USE JoinGame in a page component:
+ * ─────────────────────────────────────────
+ *   import JoinGame from '../components/JoinGame.jsx';
+ *
+ *   function MyPage() {
+ *     const [joined, setJoined] = useState(false);
+ *     if (!joined)
+ *       return <JoinGame onJoined={() => setJoined(true)} />;
+ *     return <YourGameContent />;
+ *   }
+ *
+ * HOW TO USE usePlayerContext in game components:
+ * ────────────────────────────────────────────────
+ *   import { usePlayerContext } from '../lib/PlayerContext.jsx';
+ *
+ *   function ScoreSubmit() {
+ *     const { player, submitScore } = usePlayerContext();
+ *     const handleFinish = async () => {
+ *       await submitScore({ score: 450, role: 'crewmate', survived: true, tasks_done: 7 });
+ *     };
+ *     return <button onClick={handleFinish}>Finish Round</button>;
+ *   }
+ *
+ * ADMIN PANEL:
+ * ─────────────
+ *   Navigate to /admin — password is set in VITE_ADMIN_PASSWORD env var.
+ */
+
 import { useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';  // needed by LandingPage internals
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MOCK_MODE } from './wie-week/api';
 
 import LandingPage from './wie-week/Landing/LandingPage';
 import HackAmongUs from './wie-week/Transition_pages/HackAmongUs';
 
 import Round1T from './wie-week/Transition_pages/round1t';
-import Round1 from './wie-week/round1/round1';
+import Round1  from './wie-week/round1/round1';
 
 import Round2T from './wie-week/Transition_pages/round2t';
-import Round2 from './wie-week/round2/round2';
+import Round2  from './wie-week/round2/round2';
 
 import Round3T from './wie-week/Transition_pages/round3t';
-import Round3 from './wie-week/round3/round3';
+import Round3  from './wie-week/round3/round3';
 
 import Round4T from './wie-week/Transition_pages/round4t';
-import Round4 from './wie-week/round4/round4';
+import Round4  from './wie-week/round4/round4';
 
 import Round5T from './wie-week/Transition_pages/round5t';
-import Round5 from './wie-week/round5/round5';
+import Round5  from './wie-week/round5/round5';
 
 import Finish from './wie-week/Transition_pages/finish';
+
+// ── Supabase / admin imports ──────────────────────────────────────────────────
+import { PlayerProvider } from './lib/PlayerContext.jsx';
+import AdminPanel         from './pages/AdminPanel.jsx';
 
 import './index.css';
 
@@ -60,12 +103,13 @@ function nextStage(s) {
   return i >= 0 && i < STAGES.length - 1 ? STAGES[i + 1] : 'finish';
 }
 
-export default function App() {
+// ── Main game stage machine (unchanged logic) ─────────────────────────────────
+function GameApp() {
   const [stage, setStage] = useState('landing');
   const advance = () => setStage(s => nextStage(s));
 
   return (
-    <BrowserRouter>
+    <>
       {stage === 'landing' && <LandingPage onStart={advance} />}
 
       {/* ── Cinematic transition before each round ── */}
@@ -91,6 +135,7 @@ export default function App() {
 
       {/* ── Finish ── */}
       {stage === 'finish' && <Finish onRestart={() => setStage('landing')} />}
+
       {/* ── DEV: skip button (mock mode only) ── */}
       {MOCK_MODE && (
         <button
@@ -106,6 +151,23 @@ export default function App() {
           DEV SKIP › {stage}
         </button>
       )}
-    </BrowserRouter>
+    </>
+  );
+}
+
+// ── Root: wrap everything in PlayerProvider + router ──────────────────────────
+export default function App() {
+  return (
+    <PlayerProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* ── Admin dashboard ── */}
+          <Route path="/admin" element={<AdminPanel />} />
+
+          {/* ── Main game (catches all other paths) ── */}
+          <Route path="*" element={<GameApp />} />
+        </Routes>
+      </BrowserRouter>
+    </PlayerProvider>
   );
 }
