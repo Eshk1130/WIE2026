@@ -1,10 +1,27 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './round4.css';
 import mapImage from './assets/map.png';
-import crewBlue from '../round1/assets/crewmate_blue.png';
+
+const downMods = import.meta.glob('./assets/players/down_*.png', { eager: true, import: 'default' });
+const upMods = import.meta.glob('./assets/players/up_*.png', { eager: true, import: 'default' });
+const sideMods = import.meta.glob('./assets/players/passing_*.png', { eager: true, import: 'default' });
+
+function sortedFrames(mods) {
+  return Object.keys(mods).sort().map(k => mods[k]);
+}
+
+const WALK_FRAMES = {
+  down: sortedFrames(downMods),
+  up: sortedFrames(upMods),
+  side: sortedFrames(sideMods),
+};
+
+function pickDirection(dx, dy) {
+  if (Math.abs(dx) > Math.abs(dy)) return { dir: 'side', flip: dx < 0 };
+  return { dir: dy < 0 ? 'up' : 'down', flip: false };
+}
 
 // No collision walls — player moves freely
-function isWalkable() { return true; }
 function clampToWalkable(_fx, _fy, tx, ty) { return { x: tx, y: ty }; }
 
 // ── Room definitions for minimap ─────────────────────────────────────────────
@@ -85,7 +102,9 @@ export default function Round4({ onComplete }) {
   const [minimapOpen, setMinimapOpen] = useState(false);
   const [pos, setPos] = useState({ x: 50, y: 13 });
   const [moving, setMoving] = useState(false);
-  const [facing, setFacing] = useState('right');
+  const [walkDir, setWalkDir] = useState('down');
+  const [walkFlip, setWalkFlip] = useState(false);
+  const [frameIdx, setFrameIdx] = useState(0);
 
   const targetRef = useRef({ x: 50, y: 13 });
   const posRef = useRef({ x: 50, y: 13 });
@@ -93,6 +112,7 @@ export default function Round4({ onComplete }) {
   const mapRef = useRef(null);
   const mapInnerRef = useRef(null);
   const collRef = useRef(new Set());
+  const frameTimerRef = useRef(null);
 
   useEffect(() => { collRef.current = collected; }, [collected]);
 
@@ -109,7 +129,7 @@ export default function Round4({ onComplete }) {
   }, []);
 
   // ── Animation loop (click-to-move) ───────────────────────────────────────
-  const tick = useCallback(() => {
+  const tick = useCallback(function tick() {
     const cur = posRef.current;
     const tgt = targetRef.current;
     const dx = tgt.x - cur.x;
@@ -128,7 +148,9 @@ export default function Round4({ onComplete }) {
     const next = { x: cur.x + dx * speed, y: cur.y + dy * speed };
     posRef.current = next;
     setPos({ ...next });
-    setFacing(dx > 0 ? 'right' : 'left');
+    const { dir, flip } = pickDirection(dx, dy);
+    setWalkDir(dir);
+    setWalkFlip(flip);
     checkFragments(next);
     rafRef.current = requestAnimationFrame(tick);
   }, [checkFragments]);
@@ -137,11 +159,25 @@ export default function Round4({ onComplete }) {
     const clamped = clampToWalkable(posRef.current.x, posRef.current.y, tx, ty);
     targetRef.current = clamped;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    setFrameIdx(0);
     setMoving(true);
     rafRef.current = requestAnimationFrame(tick);
   }, [tick]);
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
+
+  useEffect(() => {
+    if (!moving) {
+      if (frameTimerRef.current) clearInterval(frameTimerRef.current);
+      frameTimerRef.current = null;
+      return;
+    }
+
+    frameTimerRef.current = setInterval(() => setFrameIdx(f => (f + 1) % 6), 90);
+    return () => {
+      if (frameTimerRef.current) clearInterval(frameTimerRef.current);
+    };
+  }, [moving]);
 
   // Auto-advance to puzzle
   useEffect(() => {
@@ -160,10 +196,10 @@ export default function Round4({ onComplete }) {
       let tx = cur.x, ty = cur.y;
 
       switch (e.key) {
-        case 'ArrowUp': case 'w': case 'W': ty -= STEP; break;
-        case 'ArrowDown': case 's': case 'S': ty += STEP; break;
-        case 'ArrowLeft': case 'a': case 'A': tx -= STEP; setFacing('left'); break;
-        case 'ArrowRight': case 'd': case 'D': tx += STEP; setFacing('right'); break;
+        case 'ArrowUp': case 'w': case 'W': ty -= STEP; setWalkDir('up'); setWalkFlip(false); break;
+        case 'ArrowDown': case 's': case 'S': ty += STEP; setWalkDir('down'); setWalkFlip(false); break;
+        case 'ArrowLeft': case 'a': case 'A': tx -= STEP; setWalkDir('side'); setWalkFlip(true); break;
+        case 'ArrowRight': case 'd': case 'D': tx += STEP; setWalkDir('side'); setWalkFlip(false); break;
         default: return;
       }
       e.preventDefault();
@@ -175,6 +211,7 @@ export default function Round4({ onComplete }) {
       posRef.current = next;
       targetRef.current = next;
       setPos({ ...next });
+      if (!e.repeat) setFrameIdx(0);
       setMoving(true);
       checkFragments(next);
 
@@ -217,6 +254,7 @@ export default function Round4({ onComplete }) {
     posRef.current = { x: cx, y: cy };
     targetRef.current = { x: cx, y: cy };
     setPos({ x: cx, y: cy });
+    setFrameIdx(0);
     setMoving(false);
     setMinimapOpen(false);
   };
@@ -277,13 +315,13 @@ export default function Round4({ onComplete }) {
 
               {/* Player */}
               <img
-                src={crewBlue}
+                src={WALK_FRAMES[walkDir][frameIdx]}
                 alt="player"
-                className={`r4-player${moving ? ' r4-player--moving' : ''}`}
+                className="r4-player"
                 style={{
                   left: `${pos.x}%`,
                   top: `${pos.y}%`,
-                  transform: `translate(-50%, -50%) scaleX(${facing === 'left' ? -1 : 1})`,
+                  transform: `translate(-50%, -50%) scaleX(${walkFlip ? -1 : 1})`,
                 }}
                 draggable={false}
               />

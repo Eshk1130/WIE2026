@@ -111,20 +111,6 @@
     filter: drop-shadow(0 0 8px rgba(57, 200, 255, 0.9));
 }
 
-.r4-player--moving {
-    animation: r4-waddle 0.25s ease-in-out infinite alternate;
-}
-
-@keyframes r4-waddle {
-    from {
-        transform: translate(-50%, -50%) rotate(-5deg);
-    }
-
-    to {
-        transform: translate(-50%, -50%) rotate(5deg);
-    }
-}
-
 /* Fragments */
 .r4-fragment {
     position: absolute;

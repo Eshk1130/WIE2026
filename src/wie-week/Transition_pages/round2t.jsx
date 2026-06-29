@@ -4,18 +4,29 @@ export default function Round2T({ onStart }) {
     return (
         <RoundGuidelines
             roundNum={2}
+            label="TASK"
             title="ANOMALY DETECTION"
             accent="#ff6b35"
             icon="⚠"
-            description="The ship's systems are riddled with bugs planted by the impostor. As the crew's lead analyst, you must inspect corrupted code modules, identify hidden anomalies, and patch the systems before the ship fails."
-            rules={[
-                'Each challenge shows a code snippet — identify the bug or anomaly hidden within.',
-                'Select the correct line or option that contains the problem.',
-                'Speed and accuracy both matter — faster correct answers score higher.',
-                'Some modules have multiple issues — read carefully before selecting.',
-                'Sabotaged logs may try to mislead you — trust your technical instincts.',
-                'Complete all modules to restore ship integrity and advance to Round 3.',
-            ]}
+            description={
+                <>
+                    Engineering files reveal that several critical software modules were deliberately modified before the sabotage.
+                    <br /><br />
+                    Only by locating every anomaly can ARIA restore control of the ship.
+                    <br /><br />
+                    ⚠ SYSTEM CORRUPTION DETECTED
+                    <br />
+                    FOUR software modules contain hidden anomalies.
+                    <br />
+                    Every bug was intentionally planted to prevent system recovery.
+                    <br />
+                    Identify the incorrect line and explain the anomaly.
+                    <br />
+                    Repair every module to continue.
+                    <br /><br />
+                    — ARIA
+                </>
+            }
             onStart={onStart}
         />
     );
