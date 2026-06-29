@@ -5,7 +5,7 @@ export default function Round5T({ onStart }) {
         <RoundGuidelines
             roundNum={5}
             label="TASK"
-            title="FINAL SHOWDOWN"
+            title="THE IMPOSTOR FILES"
             accent="#f5f558"
             icon="★"
             description={

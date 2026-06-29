@@ -13,6 +13,9 @@ import blueCrew from '../../assets/images/blue.png';
 import greenCrew from '../../assets/images/green.png';
 import pinkCrew from '../../assets/images/pink.png';
 import orangeCrew from '../../assets/images/orange.png';
+import sp1 from '../../assets/images/SP1.jpeg';
+import sp2 from '../../assets/images/SP2.png';
+import sp3 from '../../assets/images/SP3.jpg';
 
 /* ── Hero star layer (absolute, sits above overlay, below content) ── */
 function HeroStars() {
@@ -104,25 +107,39 @@ function GlobalStars() {
 
 /* ── Task data ── */
 const TASKS = [
-  { id: 1, label: 'TASK 1', name: 'MCQ , Aptitude\nLogic and Tech', img: redCrew, side: 'left', delay: '0s' },
+  { id: 1, label: 'TASK 1', name: 'Mission Clearance', img: redCrew, side: 'left', delay: '0s' },
   { id: 2, label: 'TASK 2', name: 'Anomaly Detection', img: blueCrew, side: 'right', delay: '0.5s' },
-  { id: 3, label: 'TASK 3', name: '', img: greenCrew, side: 'left', delay: '1s' },
-  { id: 4, label: 'TASK 4', name: 'QR + AUDIO', img: pinkCrew, side: 'right', delay: '1.5s' },
-  { id: 5, label: 'TASK 5', name: '', img: orangeCrew, side: 'left', delay: '2s' },
+  { id: 3, label: 'TASK 3', name: 'Beneath the Interface', img: greenCrew, side: 'left', delay: '1s' },
+  { id: 4, label: 'TASK 4', name: 'Decode the Echo', img: pinkCrew, side: 'right', delay: '1.5s' },
+  { id: 5, label: 'TASK 5', name: 'The Impostor Files', img: orangeCrew, side: 'left', delay: '2s' },
+];
+
+const SPONSORS = [
+  { id: 1, name: 'AEROSPACE LAB', src: sp1, alt: 'Sponsor 1' },
+  { id: 2, name: 'NEBULA TECH', src: sp2, alt: 'Sponsor 2' },
+  { id: 3, name: 'STARGRID', src: sp3, alt: 'Sponsor 3' },
 ];
 
 const INSTRUCTIONS = [
-  { num: '01', text: 'Each crewmate is assigned a set of tasks aboard the ship. Complete all tasks before the impostor strikes.' },
-  { num: '02', text: 'Report any suspicious activity immediately. Call an emergency meeting to discuss and vote.' },
-  { num: '03', text: 'Work together — share clues, track alibis, and collaborate to survive each round.' },
-  { num: '04', text: 'The impostor can vent, sabotage systems, and eliminate crewmates silently. Stay alert.' },
-  { num: '05', text: 'Win by completing all tasks OR by identifying and ejecting every impostor from the ship.' },
+  { num: '01', text: 'The trail begins in a fractured station where every round reveals a new clue, a new risk, and a new piece of the story.' },
+  { num: '02', text: 'Explore the map, solve each puzzle, and piece together the hidden path before the clock runs out.' },
+  { num: '03', text: 'Every round carries a fresh challenge, from decoding signals to uncovering secrets buried in the ship’s systems.' },
+  { num: '04', text: 'Your time and score are being recorded, so stay sharp, move quickly, and aim for the fastest clean run.' },
+  { num: '05', text: 'Follow the narrative, trust your instincts, and survive the mission long enough to uncover the truth at the end.' },
 ];
 
 /* helpers removed: scrollTo and useRevealOnScroll were unused and caused linter warnings */
 
 /* ── Main Component ── */
 export default function LandingPage({ onStart }) {
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
+
+  const howToPlaySteps = [
+    'Begin the mission and follow each round as the story unfolds.',
+    'Inspect clues, solve puzzles, and piece together the hidden path.',
+    'Use your instincts and move quickly to beat the clock and finish the trail.',
+  ];
+
   return (
     <div className="lp-root">
       <GlobalStars />
@@ -142,7 +159,7 @@ export default function LandingPage({ onStart }) {
           <div className="hero-bottom">
             <div className="hero-btns">
               <button className="btn-pixel" id="btn-start-playing" onClick={onStart}>Start Playing</button>
-              <button className="btn-pixel" id="btn-how-to-play">How to Play</button>
+              <button className="btn-pixel" id="btn-how-to-play" onClick={() => setShowHowToPlay(true)}>How to Play</button>
             </div>
             <img src={dotsImg} alt="Slide indicators" className="hero-dots-img" />
           </div>
@@ -155,9 +172,10 @@ export default function LandingPage({ onStart }) {
         <div className="lp-inner">
           <h2 className="section-title">Mission Partners <span aria-hidden="true">🧑‍🚀</span></h2>
           <div className="partners-grid">
-            {[1, 2, 3].map(n => (
-              <div key={n} className="partner-card">
-                <span className="partner-placeholder">Partner {n}</span>
+            {SPONSORS.map(sponsor => (
+              <div key={sponsor.id} className="partner-card">
+                <img src={sponsor.src} alt={sponsor.alt} className="partner-logo" />
+                <span className="partner-name">{sponsor.name}</span>
               </div>
             ))}
           </div>
@@ -236,7 +254,7 @@ export default function LandingPage({ onStart }) {
       <section className="lp-section instructions-section" id="crew-instructions"
         style={{ backgroundImage: `url(${mpBg})` }}>
         <div className="lp-inner">
-          <h2 className="section-title">Crew Instructions</h2>
+          <h2 className="section-title">Mission Brief</h2>
           <ul className="instructions-list">
             {INSTRUCTIONS.map(inst => (
               <li key={inst.num} className="instr-item">
@@ -252,6 +270,38 @@ export default function LandingPage({ onStart }) {
         </div>
       </section>
 
+      {showHowToPlay && (
+        <div className="howto-overlay" role="dialog" aria-modal="true" aria-labelledby="howto-title" onClick={() => setShowHowToPlay(false)}>
+          <div className="howto-modal" onClick={e => e.stopPropagation()}>
+            <button className="howto-close" onClick={() => setShowHowToPlay(false)} aria-label="Close how to play guide">
+              ×
+            </button>
+            <div className="howto-stars" aria-hidden="true">
+              {Array.from({ length: 10 }).map((_, index) => (
+                <span
+                  key={index}
+                  className="howto-star"
+                  style={{
+                    left: `${8 + (index % 5) * 18}%`,
+                    top: `${12 + (index % 4) * 18}%`,
+                    animationDelay: `${index * 0.2}s`,
+                  }}
+                />
+              ))}
+            </div>
+            <h3 id="howto-title">How to Play</h3>
+            <p className="howto-copy">
+              Embark on a mission-driven trail filled with clues, hidden paths, and story-rich rounds.
+            </p>
+            <ul className="howto-list">
+              {howToPlaySteps.map(step => (
+                <li key={step}>{step}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* ══ FOOTER ══ */}
       <footer className="lp-footer">
         <div className="footer-inner">
@@ -265,7 +315,7 @@ export default function LandingPage({ onStart }) {
           <div>
             <p className="footer-col-title">Quick Links</p>
             <ul className="footer-links">
-              <li><a href="#home">About Us</a></li>
+              <li><a href="https://www.linkedin.com/company/ieee-student-branch-at-gtbit/" target="_blank" rel="noreferrer">About Us</a></li>
               <li><a href="#mission-partners">Sponsors</a></li>
               <li><a href="#tasks">Get Started</a></li>
             </ul>
@@ -273,9 +323,9 @@ export default function LandingPage({ onStart }) {
           <div>
             <p className="footer-col-title">Socials</p>
             <div className="footer-socials">
-              <a href="#" className="social-btn" aria-label="LinkedIn">in</a>
-              <a href="#" className="social-btn" aria-label="Twitter">tw</a>
-              <a href="#" className="social-btn" aria-label="Instagram">ig</a>
+              <a href="https://www.linkedin.com/company/ieee-student-branch-at-gtbit/" target="_blank" rel="noreferrer" className="social-btn" aria-label="LinkedIn">in</a>
+              <a href="https://www.instagram.com/ieeegtbit?igsh=MTQ5ZXR4bjh0bzJqaA==" target="_blank" rel="noreferrer" className="social-btn" aria-label="Instagram">ig</a>
+              <a href="https://share.google/hB9X7nEWwlFiDEvKu" target="_blank" rel="noreferrer" className="social-btn" aria-label="IEEE Societies">soc</a>
             </div>
           </div>
           <p className="footer-bottom">

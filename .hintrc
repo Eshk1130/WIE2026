@@ -10,6 +10,7 @@
           "user-select"
         ]
       }
-    ]
+    ],
+    "css-prefix-order": "off"
   }
 }

@@ -31,8 +31,16 @@ export default function FileExplorer({ crewmate, onFolderOpen, onBack }) {
         {FILE_FOLDERS.map(folder => (
           <div
             key={folder.key}
-            className="fe-row"
-            onClick={() => onFolderOpen(folder)}
+            className={`fe-row ${folder.openable ? '' : 'is-disabled'}`}
+            onClick={() => folder.openable && onFolderOpen(folder)}
+            role="button"
+            tabIndex={folder.openable ? 0 : -1}
+            onKeyDown={(e) => {
+              if (folder.openable && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                onFolderOpen(folder);
+              }
+            }}
           >
             <span className="fe-row-name">{folder.name}</span>
             <span className="fe-row-date">{folder.dateModified}</span>

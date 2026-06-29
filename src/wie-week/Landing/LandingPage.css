@@ -293,12 +293,15 @@
   background: rgba(9, 9, 26, 0.6);
   border-radius: 4px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  padding: 16px;
 }
 
 .partner-card:hover {
@@ -307,12 +310,20 @@
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
 }
 
-.partner-placeholder {
+.partner-logo {
+  width: 78%;
+  height: 72%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+.partner-name {
   font-family: 'Share Tech Mono', monospace;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  text-align: center;
 }
 
 /* ════════════════════════════════════════
@@ -446,6 +457,117 @@
   font-size: 1.05rem;
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.6;
+}
+
+/* ════════════════════════════════════════
+   HOW TO PLAY MODAL
+════════════════════════════════════════ */
+.howto-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.howto-modal {
+  position: relative;
+  width: min(92vw, 480px);
+  padding: 28px 28px 24px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(145deg, rgba(8, 15, 42, 0.96), rgba(17, 31, 69, 0.9));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.howto-modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18) 0 1px, transparent 2px),
+    radial-gradient(circle at 80% 30%, rgba(255,255,255,0.2) 0 1px, transparent 2px),
+    radial-gradient(circle at 25% 80%, rgba(255,255,255,0.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 75% 70%, rgba(255,255,255,0.16) 0 1px, transparent 2px);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.howto-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.howto-star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+
+.howto-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.howto-close:hover {
+  background: rgba(74, 158, 255, 0.22);
+}
+
+.howto-modal h3 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.howto-copy {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 12px;
+  color: rgba(255, 255, 255, 0.84);
+  line-height: 1.6;
+}
+
+.howto-list {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.5;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.18); }
 }
 
 /* ════════════════════════════════════════

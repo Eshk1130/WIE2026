@@ -1,298 +1,273 @@
-/* ── Round 5 — The Cypher Trail — Mock Data ─────────────────────────────── */
+/* ── Round 5 — The Impostor Files — Mock Data ───────────────────────────── */
 
-// ── Among Us–style avatar colors for each crewmate ──
 const COLORS = {
-  1: '#3ed94e', // green
-  2: '#f17d2a', // orange
-  3: '#1d9bf0', // blue
-  4: '#e23636', // red  (the impostor!)
-  5: '#d9d926', // yellow
+  1: '#3ed94e',  // James  — green
+  2: '#f17d2a',  // Sarah  — orange
+  3: '#1d9bf0',  // Daniel — blue
+  4: '#e23636',  // Olivia — red
+  5: '#d9d926',  // Michael — yellow (IMPOSTOR)
 };
 
-// ── Crewmate roster ──
 export const CREWMATES = [
-  { id: 1, name: 'Crewmate 1', displayName: 'James Carter', role: 'Captain', color: COLORS[1], suspicious: false },
-  { id: 2, name: 'Crewmate 2', displayName: 'Lena Okafor', role: 'Engineer', color: COLORS[2], suspicious: false },
-  { id: 3, name: 'Crewmate 3', displayName: 'Raj Malhotra', role: 'Medic', color: COLORS[3], suspicious: false },
-  { id: 4, name: 'Crewmate 4', displayName: 'Viktor Kozlov', role: 'Security Officer', color: COLORS[4], suspicious: true },
-  { id: 5, name: 'Crewmate 5', displayName: 'Mei-Lin Chen', role: 'Navigator', color: COLORS[5], suspicious: false },
+  { id: 1, name: 'James Carter',   displayName: 'James Carter',   role: 'Captain',            color: COLORS[1], suspicious: false },
+  { id: 2, name: 'Sarah Mitchell', displayName: 'Sarah Mitchell', role: 'Chief Engineer',      color: COLORS[2], suspicious: false },
+  { id: 3, name: 'Daniel Brooks',  displayName: 'Daniel Brooks',  role: 'Navigation Officer',  color: COLORS[3], suspicious: false },
+  { id: 4, name: 'Olivia Bennett', displayName: 'Olivia Bennett', role: 'Research Scientist',  color: COLORS[4], suspicious: false },
+  { id: 5, name: 'Michael Foster', displayName: 'Michael Foster', role: 'Security Officer',    color: COLORS[5], suspicious: true  },
 ];
 
-// ── File / folder metadata shown in the explorer ──
 export const FILE_FOLDERS = [
-  { key: 'taskHistory', name: 'Task History', type: 'File Folder', size: '—', dateModified: '2-06-2026 11:05 PM' },
-  { key: 'personalProfile', name: 'Personal Profile', type: 'File Folder', size: '—', dateModified: '2-06-2026 11:05 PM' },
-  { key: 'messageHistory', name: 'Message History', type: 'File Folder', size: '—', dateModified: '2-06-2026 11:05 PM' },
-  { key: 'accessLog', name: 'Access Log', type: 'File Folder', size: '—', dateModified: '2-06-2026 11:05 PM' },
+  { key: 'taskHistory',     name: 'Task History',     type: 'File Folder', size: '—', dateModified: '2-06-2026 11:05 PM', openable: true },
+  { key: 'personalProfile', name: 'Personal Profile', type: 'File Folder', size: '—', dateModified: '2-06-2026 11:05 PM', openable: true },
+  { key: 'messageHistory',  name: 'Message History',  type: 'File Folder', size: '—', dateModified: '2-06-2026 11:05 PM', openable: true },
+  { key: 'accessLog',       name: 'Access Log',       type: 'File Folder', size: '—', dateModified: '2-06-2026 11:05 PM', openable: true },
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TASK HISTORY
    ═══════════════════════════════════════════════════════════════════════════ */
-
 const TASK_HISTORY = {
   1: [
-    { id: 'T-101', task: 'Calibrate Navigation System', location: 'Bridge', status: 'Completed', date: '2026-06-01' },
-    { id: 'T-102', task: 'Run Diagnostic on Engines', location: 'Engine Room', status: 'Completed', date: '2026-06-01' },
-    { id: 'T-103', task: 'Submit Crew Roster Report', location: 'Admin', status: 'Completed', date: '2026-06-02' },
-    { id: 'T-104', task: 'Inspect Shield Generator', location: 'Shields', status: 'Pending', date: '2026-06-02' },
+    { id: 'T-101', task: 'Mission Briefing',            location: 'Bridge',         status: 'Completed', date: '08:05' },
+    { id: 'T-102', task: 'Crew Authorization',          location: 'Admin',          status: 'Completed', date: '09:20' },
+    { id: 'T-103', task: 'Communications Check',        location: 'Communications', status: 'Completed', date: '11:10' },
+    { id: 'T-104', task: 'Emergency Broadcast Approval',location: 'Bridge',         status: 'Completed', date: '18:40' },
   ],
   2: [
-    { id: 'T-201', task: 'Repair Wiring Panel A', location: 'Electrical', status: 'Completed', date: '2026-06-01' },
-    { id: 'T-202', task: 'Replace O2 Filters', location: 'O2 Room', status: 'Completed', date: '2026-06-01' },
-    { id: 'T-203', task: 'Override Thruster Bypass Protocol', location: 'Engine Room', status: 'Completed', date: '2026-06-02' },
-    { id: 'T-204', task: 'Reboot Communication Array', location: 'Comms', status: 'Pending', date: '2026-06-02' },
+    { id: 'E-201', task: 'Reactor Calibration', location: 'Reactor',     status: 'Completed', date: '14:05' },
+    { id: 'E-202', task: 'Engine Diagnostics',  location: 'Engine Room', status: 'Completed', date: '15:10' },
+    { id: 'E-203', task: 'Electrical Repair',   location: 'Electrical',  status: 'Completed', date: '16:30' },
+    { id: 'E-204', task: 'Power Grid Test',     location: 'Electrical',  status: 'Completed', date: '17:20' },
   ],
   3: [
-    { id: 'T-301', task: 'Distribute Medical Supplies', location: 'MedBay', status: 'Completed', date: '2026-06-01' },
-    { id: 'T-302', task: 'Conduct Crew Health Screening', location: 'MedBay', status: 'Completed', date: '2026-06-01' },
-    { id: 'T-303', task: 'Update Medical Records', location: 'Admin', status: 'Completed', date: '2026-06-02' },
-    { id: 'T-304', task: 'Inspect Specimen Samples', location: 'Laboratory', status: 'Pending', date: '2026-06-02' },
+    { id: 'N-301', task: 'Navigation Calibration',  location: 'Navigation',     status: 'Completed', date: '10:10' },
+    { id: 'N-302', task: 'Star Map Update',          location: 'Bridge',         status: 'Completed', date: '12:00' },
+    { id: 'N-303', task: 'Communication Relay',      location: 'Communications', status: 'Completed', date: '16:25' },
+    { id: 'N-304', task: 'Flight Path Verification', location: 'Navigation',     status: 'Completed', date: '18:05' },
   ],
   4: [
-    { id: 'T-401', task: 'Patrol Lower Deck', location: 'Lower Engine', status: 'Completed', date: '2026-06-01', suspicious: false },
-    { id: 'T-402', task: 'Upload Virus to Mainframe', location: 'Admin', status: 'Completed', date: '2026-06-01', suspicious: true },
-    { id: 'T-403', task: 'Override Security Locks', location: 'Weapons', status: 'Completed', date: '2026-06-02', suspicious: true },
-    { id: 'T-404', task: 'Disable Emergency Alarm', location: 'Reactor', status: 'Completed', date: '2026-06-02', suspicious: true },
+    { id: 'R-401', task: 'Sample Analysis',       location: 'Laboratory', status: 'Completed', date: '09:15' },
+    { id: 'R-402', task: 'Medical Report',         location: 'MedBay',     status: 'Completed', date: '11:00' },
+    { id: 'R-403', task: 'Specimen Storage',       location: 'Storage',    status: 'Completed', date: '15:30' },
+    { id: 'R-404', task: 'Research Notes Upload',  location: 'Laboratory', status: 'Completed', date: '18:10' },
   ],
   5: [
-    { id: 'T-501', task: 'Chart Star Course', location: 'Navigation', status: 'Completed', date: '2026-06-01' },
-    { id: 'T-502', task: 'Log Asteroid Coordinates', location: 'Navigation', status: 'Completed', date: '2026-06-01' },
-    { id: 'T-503', task: 'Calibrate Telescope Array', location: 'Navigation', status: 'Completed', date: '2026-06-02' },
-    { id: 'T-504', task: 'Submit Flight Path Report', location: 'Admin', status: 'Pending', date: '2026-06-02' },
-    { id: 'T-505', task: 'Purge Outdated Navigation Backups', location: 'Navigation', status: 'Completed', date: '2026-06-02' },
+    // S-501 and S-504 check out — Security area, access Granted
+    // S-502: claims Reactor Override at Reactor — but access log says DENIED at 14:08
+    // S-503: claims Navigation Update at Navigation — but access log says DENIED at 16:26
+    { id: 'S-501', task: 'Camera Patrol',       location: 'Security',   status: 'Completed', date: '08:30' },
+    { id: 'S-502', task: 'Reactor Override',    location: 'Reactor',    status: 'Completed', date: '14:08' },
+    { id: 'S-503', task: 'Navigation Update',   location: 'Navigation', status: 'Completed', date: '16:26' },
+    { id: 'S-504', task: 'Final Security Sweep',location: 'Security',   status: 'Completed', date: '18:35' },
   ],
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PERSONAL PROFILES
    ═══════════════════════════════════════════════════════════════════════════ */
-
 const PERSONAL_PROFILES = {
   1: {
-    crewId: 'CRW-0421',
-    dateJoined: '2024-03-15',
-    gender: 'Male',
-    bloodType: 'O+',
-    rank: 'Captain',
-    homePlanet: 'Earth — Houston Sector',
-    level: 17,
-    xp: 1260,
-    maxXp: 2000,
-    rating: 1000,
-    ratingPct: 'TOP 50%',
-    certification: 'Level-5 Command Authority',
+    crewId: 'C-001', role: 'Captain', certification: 'Level 5',
+    department: 'Command', experience: '14 Years', emergencyContact: 'Earth Command',
+    bloodType: 'O+', gender: 'Male',
+    level: 14, xp: 1260, maxXp: 2000, rating: 1000, ratingPct: 'TOP 50%',
     gameStats: { gamesPlayed: 142, wins: 98, tasksCompleted: 1847 },
   },
   2: {
-    crewId: 'CRW-0587',
-    dateJoined: '2024-06-22',
-    gender: 'Female',
-    bloodType: 'A-',
-    rank: 'Engineer',
-    homePlanet: 'Mars — Olympus Colony',
-    level: 14,
-    xp: 920,
-    maxXp: 1500,
-    rating: 880,
-    ratingPct: 'TOP 60%',
-    certification: 'Class-3 Engineering License',
+    crewId: 'E-002', role: 'Chief Engineer', certification: 'Level 5',
+    department: 'Engineering', experience: '11 Years',
+    bloodType: 'A-', gender: 'Female',
+    level: 11, xp: 920, maxXp: 1500, rating: 880, ratingPct: 'TOP 60%',
     gameStats: { gamesPlayed: 110, wins: 72, tasksCompleted: 1350 },
   },
   3: {
-    crewId: 'CRW-0293',
-    dateJoined: '2024-01-10',
-    gender: 'Male',
-    bloodType: 'B+',
-    rank: 'Medic',
-    homePlanet: 'Earth — Mumbai Sector',
-    level: 15,
-    xp: 1100,
-    maxXp: 1800,
-    rating: 950,
-    ratingPct: 'TOP 55%',
-    certification: 'Xeno-Biology Medical License',
+    crewId: 'N-003', role: 'Navigation Officer', certification: 'Level 4',
+    department: 'Navigation', experience: '8 Years',
+    bloodType: 'B+', gender: 'Male',
+    level: 8, xp: 1100, maxXp: 1800, rating: 950, ratingPct: 'TOP 55%',
     gameStats: { gamesPlayed: 128, wins: 85, tasksCompleted: 1620 },
   },
   4: {
-    crewId: 'CRW-0666',
-    dateJoined: '2025-11-01',
-    gender: 'Male',
-    bloodType: 'AB-',
-    rank: 'Security Officer',
-    homePlanet: 'Unknown — CLASSIFIED',
-    level: 9,
-    xp: 450,
-    maxXp: 1000,
-    rating: 320,
-    ratingPct: 'TOP 90%',
-    certification: 'UNAUTHORIZED — FORGED CREDENTIALS',
-    certSuspicious: true,
+    crewId: 'R-004', role: 'Research Scientist', certification: 'Level 3',
+    department: 'Research', experience: '6 Years',
+    bloodType: 'AB-', gender: 'Female',
+    level: 6, xp: 450, maxXp: 1000, rating: 320, ratingPct: 'TOP 90%',
     gameStats: { gamesPlayed: 34, wins: 31, tasksCompleted: 98 },
   },
   5: {
-    crewId: 'CRW-0815',
-    dateJoined: '2024-09-03',
-    gender: 'Female',
-    bloodType: 'O-',
-    rank: 'Navigator',
-    homePlanet: 'Titan — Kraken Station',
-    level: 13,
-    xp: 780,
-    maxXp: 1400,
-    rating: 820,
-    ratingPct: 'TOP 62%',
-    certification: 'Stellar Navigation Grade-4',
+    crewId: 'S-005', role: 'Security Officer', certification: 'Level 4',
+    department: 'Security', experience: '9 Years',
+    bloodType: 'O-', gender: 'Male',
+    level: 9, xp: 780, maxXp: 1400, rating: 820, ratingPct: 'TOP 62%',
     gameStats: { gamesPlayed: 96, wins: 63, tasksCompleted: 1180 },
   },
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESSAGE HISTORY
+   MESSAGE HISTORY  — per-crewmate 1-on-1 threads
+   Structure: { conversations: [{contactId, contactName, lastMsg, time}], chatMessages: {contactId: [{sender, text, time, self}]} }
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const ALL_CREW_GC_MESSAGES = [
-  { sender: 'Crewmate 1', senderId: 1, text: 'Reminder: mandatory briefing at 0800.', time: '12:02' },
-  { sender: 'Crewmate 2', senderId: 2, text: 'I will be there.', time: '12:05' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'Copy that, Captain.', time: '12:10' },
-  { sender: 'Crewmate 3', senderId: 3, text: 'On my way.', time: '12:15' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'See you all at the bridge.', time: '12:20' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'Has anyone seen the admin logs from last night?', time: '13:00' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'No, why? Is something missing?', time: '13:05' },
-  { sender: 'Crewmate 2', senderId: 2, text: 'I was in electrical, I did not check.', time: '13:10' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'I was updating star charts, did not notice anything.', time: '13:12' },
-  { sender: 'Crewmate 3', senderId: 3, text: 'Everything was fine when I was in the MedBay.', time: '13:15' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'Keep your eyes open, something feels off.', time: '13:20' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'Wait, did the lights just flicker for anyone else?', time: '14:15' },
-  { sender: 'Crewmate 2', senderId: 2, text: 'Yeah, just saw that in O2 as well. Let me check the power grid.', time: '14:16' },
-  { sender: 'Crewmate 3', senderId: 3, text: 'I hope it’s just a glitch, we don’t need a blackout right now.', time: '14:18' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'I’m heading down to reactor to see if everything is stable.', time: '14:20' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'Good idea. Keep communications open.', time: '14:22' },
-  { sender: 'Crewmate 2', senderId: 2, text: 'Power grid shows a minor surge, but nothing critical.', time: '14:25' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'Reactor is stable. No signs of tampering.', time: '14:30' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'Alright, back to normal then. I’m almost done with the navigation calibration.', time: '14:32' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'Has anyone seen Crewmate 3 recently?', time: '15:10' },
-  { sender: 'Crewmate 2', senderId: 2, text: 'He was in MedBay earlier, I think he was doing health screenings.', time: '15:12' },
-  { sender: 'Crewmate 3', senderId: 3, text: 'I’m still here, Captain. Just finished updating the medical records.', time: '15:15' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'Good. Just making sure everyone is accounted for.', time: '15:18' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'I’m moving from Weapons to Admin for my next patrol.', time: '15:25' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'Hey, speaking of Admin... I just noticed a strange file export in the logs.', time: '16:05' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'What kind of file export?', time: '16:07' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'It looks like the crew manifest was downloaded. Over 2GB of data.', time: '16:10' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'That’s weird. Who would need the whole manifest?', time: '16:12' },
-  { sender: 'Crewmate 2', senderId: 2, text: 'Could it be an automated backup?', time: '16:15' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'I didn’t authorize any backups today. Everyone, stay alert.', time: '16:20' },
-  { sender: 'Crewmate 3', senderId: 3, text: 'This is getting creepy. I’m locking the MedBay doors.', time: '16:22' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'Don’t panic, I’ll check the security cameras.', time: '16:25' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'Let us know if you find anything.', time: '16:28' },
-  { sender: 'Crewmate 3', senderId: 3, text: 'Crewmate 5, how did you know the export was exactly 2GB? That is very specific.', time: '16:35' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'I saw it in the logs. Anyone can check, it is right there.', time: '16:38' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'She has a point though. Why were you checking the admin logs at all?', time: '16:40' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'Everyone calm down. We investigate properly, no accusations without proof.', time: '16:42' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'Crewmate 2, you were near electrical during the surge. That seems suspicious.', time: '16:50' },
-  { sender: 'Crewmate 2', senderId: 2, text: 'I was fixing the wiring panel. That is literally my assigned task.', time: '16:52' },
-  { sender: 'Crewmate 3', senderId: 3, text: 'I can confirm, I saw Crewmate 2 in electrical earlier.', time: '16:54' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'What about the weapons manifest access? Someone pulled that file at midnight.', time: '17:01' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'Who accessed weapons?', time: '17:03' },
-  { sender: 'Crewmate 3', senderId: 3, text: 'I was reviewing emergency protocols. The medic needs to know where the weapons are stored in case of a breach.', time: '17:05' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'That sounds like a stretch to me.', time: '17:07' },
-  { sender: 'Crewmate 2', senderId: 2, text: 'Viktor you have been deflecting this whole time. What were YOU doing at 3am?', time: '17:10' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'Patrolling. It is my job as Security Officer.', time: '17:12' },
-  { sender: 'Crewmate 5', senderId: 5, text: 'The logs show you in Admin at 3:45am. That is not a patrol route.', time: '17:15' },
-  { sender: 'Crewmate 4', senderId: 4, text: 'I got a false alarm alert. I went to check it out.', time: '17:17' },
-  { sender: 'Crewmate 1', senderId: 1, text: 'There is no record of any alert at that time.', time: '17:20' },
-];
+const MESSAGE_HISTORY = {
+  // ── James Carter (1) ──────────────────────────────────────────
+  1: {
+    conversations: [
+      { contactId: 2, contactName: 'Sarah Mitchell',  lastMsg: 'Finish before 15:00.', time: '08:42' },
+      { contactId: 5, contactName: 'Michael Foster',  lastMsg: 'Good work.',            time: '18:32' },
+      { contactId: 3, contactName: 'Daniel Brooks',   lastMsg: 'Acknowledged.',         time: '16:07' },
+    ],
+    chatMessages: {
+      2: [
+        { sender: 'Sarah',  time: '08:40', text: 'Need reactor maintenance approval.' },
+        { sender: 'James',  time: '08:42', text: 'Approved. Finish before 15:00.', self: true },
+      ],
+      5: [
+        { sender: 'Michael',time: '18:30', text: 'Security sweep complete.' },
+        { sender: 'James',  time: '18:32', text: 'Good work.', self: true },
+      ],
+      3: [
+        { sender: 'Daniel', time: '16:05', text: 'Course updated successfully.' },
+        { sender: 'James',  time: '16:07', text: 'Acknowledged.', self: true },
+      ],
+    },
+  },
 
-// Helper to get chat for a specific contact (filters GC messages for what they typed)
-function get1on1Chat(idA, idB) {
-  return ALL_CREW_GC_MESSAGES.filter(msg => msg.senderId === idB);
-}
+  // ── Sarah Mitchell (2) ────────────────────────────────────────
+  2: {
+    conversations: [
+      { contactId: 1, contactName: 'James Carter',    lastMsg: 'Starting maintenance.',  time: '08:43' },
+      { contactId: 4, contactName: 'Olivia Bennett',  lastMsg: 'Stable.',                time: '14:12' },
+    ],
+    chatMessages: {
+      1: [
+        { sender: 'James',  time: '08:40', text: 'Reactor authorization granted.' },
+        { sender: 'Sarah',  time: '08:43', text: 'Starting maintenance.', self: true },
+      ],
+      4: [
+        { sender: 'Olivia', time: '14:10', text: 'Power stable?' },
+        { sender: 'Sarah',  time: '14:12', text: 'Stable.', self: true },
+      ],
+    },
+  },
 
-// Dynamically generate message history for a specific crewmate
-function generateMessageHistoryForPOV(crewmateId) {
-  const history = {
-    conversations: [],
-    chatMessages: {} // now a map of contactId -> messages array
-  };
+  // ── Daniel Brooks (3) ─────────────────────────────────────────
+  3: {
+    conversations: [
+      { contactId: 4, contactName: 'Olivia Bennett', lastMsg: "I don't have clearance.", time: '13:15' },
+      { contactId: 1, contactName: 'James Carter',   lastMsg: 'Done.',                   time: '18:07' },
+    ],
+    chatMessages: {
+      4: [
+        { sender: 'Olivia',  time: '13:10', text: 'Need Storage access.' },
+        { sender: 'Daniel',  time: '13:15', text: "I don't have clearance.", self: true },
+      ],
+      1: [
+        { sender: 'James',   time: '18:05', text: 'Navigation complete?' },
+        { sender: 'Daniel',  time: '18:07', text: 'Done.', self: true },
+      ],
+    },
+  },
 
-  // Add ALL CREW GC
-  history.conversations.push({
-    contactId: 0,
-    contactName: 'ALL CREW GC',
-    lastMsg: ALL_CREW_GC_MESSAGES[ALL_CREW_GC_MESSAGES.length - 1]?.text || '',
-    time: ALL_CREW_GC_MESSAGES[ALL_CREW_GC_MESSAGES.length - 1]?.time || '00:00'
-  });
-  history.chatMessages[0] = ALL_CREW_GC_MESSAGES;
+  // ── Olivia Bennett (4) ────────────────────────────────────────
+  4: {
+    conversations: [
+      { contactId: 2, contactName: 'Sarah Mitchell', lastMsg: 'Sending now.',         time: '13:02' },
+      { contactId: 3, contactName: 'Daniel Brooks',  lastMsg: 'Captain approved it.', time: '15:32' },
+    ],
+    chatMessages: {
+      2: [
+        { sender: 'Sarah',  time: '13:00', text: 'Need more coolant.' },
+        { sender: 'Olivia', time: '13:02', text: 'Sending now.', self: true },
+      ],
+      3: [
+        { sender: 'Daniel', time: '15:30', text: 'Storage opened?' },
+        { sender: 'Olivia', time: '15:32', text: 'Captain approved it.', self: true },
+      ],
+    },
+  },
 
-  // Add all other crewmates
-  CREWMATES.forEach(otherCrew => {
-    if (otherCrew.id !== crewmateId) {
-      const messages = get1on1Chat(crewmateId, otherCrew.id);
-      const lastMsgObj = messages[messages.length - 1];
-
-      history.conversations.push({
-        contactId: otherCrew.id,
-        contactName: otherCrew.name,
-        lastMsg: lastMsgObj ? lastMsgObj.text : 'No recent messages',
-        time: lastMsgObj ? lastMsgObj.time : ''
-      });
-      history.chatMessages[otherCrew.id] = messages;
-    }
-  });
-
-  return history;
-}
+  // ── Michael Foster (5) ── IMPOSTOR ────────────────────────────
+  5: {
+    conversations: [
+      { contactId: 1, contactName: 'James Carter',   lastMsg: 'Clear.',           time: '08:31' },
+      { contactId: 2, contactName: 'Sarah Mitchell', lastMsg: 'Already fixed it.',time: '14:09' },
+      { contactId: 3, contactName: 'Daniel Brooks',  lastMsg: 'I uploaded it.',   time: '16:28' },
+    ],
+    chatMessages: {
+      1: [
+        { sender: 'James',   time: '08:30', text: 'Security status?' },
+        { sender: 'Michael', time: '08:31', text: 'Clear.', self: true },
+      ],
+      2: [
+        // Sarah says she is repairing Reactor — Michael claims to have already done it
+        // but his access log shows DENIED at Reactor at 14:08
+        { sender: 'Sarah',   time: '14:07', text: "I'm repairing Reactor." },
+        { sender: 'Michael', time: '14:09', text: 'Already fixed it.', self: true },
+      ],
+      3: [
+        // Daniel says Navigation update done — Michael claims to have uploaded it
+        // but his access log shows DENIED at Navigation at 16:26
+        { sender: 'Daniel',  time: '16:26', text: 'Navigation update done.' },
+        { sender: 'Michael', time: '16:28', text: 'I uploaded it.', self: true },
+      ],
+    },
+  },
+};
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ACCESS LOGS
    ═══════════════════════════════════════════════════════════════════════════ */
-
 const ACCESS_LOGS = {
   1: [
-    { timestamp: '2026-06-01 08:00:12', action: 'LOGIN', location: 'Bridge', detail: 'Standard authentication', level: 'INFO' },
-    { timestamp: '2026-06-01 09:15:33', action: 'FILE_ACCESS', location: 'Admin', detail: 'Opened crew roster file', level: 'INFO' },
-    { timestamp: '2026-06-01 14:22:01', action: 'SYSTEM_CHECK', location: 'Bridge', detail: 'Routine diagnostics passed', level: 'INFO' },
-    { timestamp: '2026-06-02 07:55:44', action: 'LOGIN', location: 'Bridge', detail: 'Standard authentication', level: 'INFO' },
-    { timestamp: '2026-06-01 02:44:10', action: 'FILE_ACCESS', location: 'Admin', detail: 'Reviewed crew manifest — routine captain audit', level: 'WARNING' },
+    { timestamp: '08:03', action: 'ACCESS', location: 'Bridge',         detail: 'Granted', level: 'INFO' },
+    { timestamp: '09:17', action: 'ACCESS', location: 'Admin',          detail: 'Granted', level: 'INFO' },
+    { timestamp: '11:06', action: 'ACCESS', location: 'Communications', detail: 'Granted', level: 'INFO' },
+    { timestamp: '18:39', action: 'ACCESS', location: 'Bridge',         detail: 'Granted', level: 'INFO' },
   ],
   2: [
-    { timestamp: '2026-06-01 08:10:05', action: 'LOGIN', location: 'Electrical', detail: 'Standard authentication', level: 'INFO' },
-    { timestamp: '2026-06-01 10:30:20', action: 'REPAIR_LOG', location: 'Electrical', detail: 'Wiring Panel A — repaired', level: 'INFO' },
-    { timestamp: '2026-06-01 15:45:12', action: 'FILE_ACCESS', location: 'Comms', detail: 'Accessed comm array specs', level: 'INFO' },
-    { timestamp: '2026-06-02 08:05:30', action: 'LOGIN', location: 'Engine Room', detail: 'Standard authentication', level: 'INFO' },
-    { timestamp: '2026-06-01 03:58:44', action: 'SYSTEM_ACCESS', location: 'Electrical', detail: 'Emergency panel override — power fluctuation response', level: 'WARNING' },
+    { timestamp: '14:02', action: 'ACCESS', location: 'Reactor',     detail: 'Granted', level: 'INFO' },
+    { timestamp: '15:08', action: 'ACCESS', location: 'Engine Room', detail: 'Granted', level: 'INFO' },
+    { timestamp: '16:27', action: 'ACCESS', location: 'Electrical',  detail: 'Granted', level: 'INFO' },
+    { timestamp: '17:19', action: 'ACCESS', location: 'Electrical',  detail: 'Granted', level: 'INFO' },
   ],
   3: [
-    { timestamp: '2026-06-01 07:45:00', action: 'LOGIN', location: 'MedBay', detail: 'Standard authentication', level: 'INFO' },
-    { timestamp: '2026-06-01 11:20:15', action: 'FILE_ACCESS', location: 'MedBay', detail: 'Updated medical records', level: 'INFO' },
-    { timestamp: '2026-06-01 16:00:45', action: 'SCAN_COMPLETE', location: 'Laboratory', detail: 'Specimen analysis complete', level: 'INFO' },
-    { timestamp: '2026-06-02 07:50:10', action: 'LOGIN', location: 'MedBay', detail: 'Standard authentication', level: 'INFO' },
-    { timestamp: '2026-06-01 23:58:02', action: 'FILE_ACCESS', location: 'Weapons', detail: 'Accessed weapons manifest — reason unlogged', level: 'WARNING' },
+    { timestamp: '10:08', action: 'ACCESS', location: 'Navigation',     detail: 'Granted', level: 'INFO' },
+    { timestamp: '11:58', action: 'ACCESS', location: 'Bridge',         detail: 'Granted', level: 'INFO' },
+    { timestamp: '16:23', action: 'ACCESS', location: 'Communications', detail: 'Granted', level: 'INFO' },
+    { timestamp: '18:04', action: 'ACCESS', location: 'Navigation',     detail: 'Granted', level: 'INFO' },
   ],
   4: [
-    { timestamp: '2026-06-01 03:12:44', action: 'LOGIN', location: 'Lower Engine', detail: 'Standard authentication', level: 'INFO', suspicious: false },
-    { timestamp: '2026-06-01 03:45:09', action: 'UNAUTHORIZED', location: 'Admin', detail: 'Accessed restricted database', level: 'CRITICAL', suspicious: true },
-    { timestamp: '2026-06-01 03:46:02', action: 'FILE_DELETE', location: 'Admin', detail: 'Deleted file: engineer_lena_personal_comms.zip — 340MB', level: 'CRITICAL', suspicious: true },
-    { timestamp: '2026-06-01 04:02:33', action: 'DATA_EXPORT', location: 'Admin', detail: 'Exported crew manifest — 2.4GB', level: 'WARNING', suspicious: true },
-    { timestamp: '2026-06-01 04:18:57', action: 'CAMERA_DISABLE', location: 'Deck 7', detail: 'Disabled surveillance feed', level: 'CRITICAL', suspicious: true },
-    { timestamp: '2026-06-01 04:30:22', action: 'FILE_DELETE', location: 'Security', detail: 'Purged access log backups', level: 'CRITICAL', suspicious: true },
-    { timestamp: '2026-06-01 04:55:10', action: 'FORCE_LOGOUT', location: 'System', detail: 'Session terminated abnormally', level: 'WARNING', suspicious: true },
+    { timestamp: '09:12', action: 'ACCESS', location: 'Laboratory', detail: 'Granted', level: 'INFO' },
+    { timestamp: '10:58', action: 'ACCESS', location: 'MedBay',     detail: 'Granted', level: 'INFO' },
+    { timestamp: '15:28', action: 'ACCESS', location: 'Storage',    detail: 'Granted', level: 'INFO' },
+    { timestamp: '18:09', action: 'ACCESS', location: 'Laboratory', detail: 'Granted', level: 'INFO' },
   ],
   5: [
-    { timestamp: '2026-06-01 08:20:00', action: 'LOGIN', location: 'Navigation', detail: 'Standard authentication', level: 'INFO' },
-    { timestamp: '2026-06-01 12:10:30', action: 'FILE_ACCESS', location: 'Navigation', detail: 'Updated star charts', level: 'INFO' },
-    { timestamp: '2026-06-01 17:30:05', action: 'COURSE_UPDATE', location: 'Navigation', detail: 'Applied course correction', level: 'INFO' },
-    { timestamp: '2026-06-02 08:15:22', action: 'LOGIN', location: 'Navigation', detail: 'Standard authentication', level: 'INFO' },
-    { timestamp: '2026-06-01 04:08:33', action: 'FILE_ACCESS', location: 'Admin', detail: 'Accessed admin terminal — unscheduled', level: 'WARNING' },
-    { timestamp: '2026-06-01 04:11:20', action: 'DATA_VIEW', location: 'Admin', detail: 'Viewed crew manifest export log', level: 'WARNING' },
+    { timestamp: '08:29', action: 'ACCESS', location: 'Security',   detail: 'Granted', level: 'INFO' },
+    // Claims to have done Reactor Override (S-502) at 14:08 — but was DENIED
+    { timestamp: '14:08', action: 'ACCESS', location: 'Reactor',    detail: 'Denied',  level: 'WARNING', suspicious: true },
+    // Claims to have done Navigation Update (S-503) at 16:26 — but was DENIED
+    { timestamp: '16:26', action: 'ACCESS', location: 'Navigation', detail: 'Denied',  level: 'WARNING', suspicious: true },
+    { timestamp: '18:34', action: 'ACCESS', location: 'Security',   detail: 'Granted', level: 'INFO' },
   ],
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   SHIP REGULATIONS  (separate tab — the rulebook players use to solve puzzle)
+   ═══════════════════════════════════════════════════════════════════════════ */
+export const SHIP_REGULATIONS = [
+  'Only the Chief Engineer may perform Reactor Calibration, Reactor Override, or Engine Diagnostics.',
+  'Only the Navigation Officer may update Flight Routes or Navigation Data.',
+  'Security Officers cannot enter Navigation or Reactor Control without emergency authorization.',
+  'Any Denied access log means the associated task could not have been completed.',
+  'Tasks marked Completed must have a corresponding Granted entry in the Access Log.',
+  'Crew messages are timestamped and considered authentic.',
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════
    PUBLIC DATA GETTERS
    ═══════════════════════════════════════════════════════════════════════════ */
-
-export function getTaskHistory(crewmateId) { return TASK_HISTORY[crewmateId] ?? []; }
-export function getPersonalProfile(crewmateId) { return PERSONAL_PROFILES[crewmateId] ?? {}; }
-export function getMessageHistory(crewmateId) { return generateMessageHistoryForPOV(crewmateId); }
-export function getAccessLog(crewmateId) { return ACCESS_LOGS[crewmateId] ?? []; }
+export function getTaskHistory(crewmateId)    { return TASK_HISTORY[crewmateId]      ?? []; }
+export function getPersonalProfile(crewmateId){ return PERSONAL_PROFILES[crewmateId] ?? {}; }
+export function getMessageHistory(crewmateId) { return MESSAGE_HISTORY[crewmateId]   ?? { conversations: [], chatMessages: {} }; }
+export function getAccessLog(crewmateId)      { return ACCESS_LOGS[crewmateId]       ?? []; }

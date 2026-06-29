@@ -5,7 +5,7 @@ export default function Round4T({ onStart }) {
         <RoundGuidelines
             roundNum={4}
             label="TASK"
-            title="QR + AUDIO INTERCEPT"
+            title="DECODE THE ECHO"
             accent="#ed54ba"
             icon="◉"
             description={

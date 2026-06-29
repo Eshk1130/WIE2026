@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { CREWMATES, FILE_FOLDERS, getTaskHistory, getPersonalProfile, getMessageHistory, getAccessLog } from '../data/mockData';
+import { CREWMATES, FILE_FOLDERS, getTaskHistory, getPersonalProfile, getMessageHistory, getAccessLog, SHIP_REGULATIONS } from '../data/mockData';
 import TaskHistoryView from './viewers/TaskHistoryView';
 import PersonalProfileView from './viewers/PersonalProfileView';
 import MessageHistoryView from './viewers/MessageHistoryView';
 import AccessLogView from './viewers/AccessLogView';
+import ShipRegulationsView from './viewers/ShipRegulationsView';
 import AmongUsIcon from './AmongUsIcon';
 import '../styles/FolderViewer.css';
 import '../styles/Viewers.css';
@@ -16,20 +17,21 @@ const VIEWER_LABELS = {
   personalProfile: 'CREW PROFILE',
   messageHistory: 'MESSAGE HISTORY',
   accessLog: 'ACCESS LOG',
+  shipRegulations: 'SHIP REGULATIONS',
 };
 
 const HINTS = [
-  { label: '_ _ _ 1', text: "The suspect's identification number conceals a digit — seek the fourth mark in his crew registry." },
-  { label: '_ _ _ 2', text: "Among his logged duties, some were never meant to be seen. Count only the ones that betray him." },
-  { label: '_ _ _ 3', text: "A door was forced open in the dead of night. The hour it happened is the digit you need." },
-  { label: '_ _ _ 4', text: "His standing among the crew is ranked — the final figure of that rank holds your answer." },
+  { label: '_ _ _ 1', text: 'Compare the task history against the access log for contradictions.' },
+  { label: '_ _ _ 2', text: 'Check whether the messages line up with the claimed task completion times.' },
+  { label: '_ _ _ 3', text: 'Match the suspect\'s role against the ship regulations.' },
+  { label: '_ _ _ 4', text: 'Any denied access means the corresponding task could not have been completed.' },
 ];
 
 const EVIDENCE_HINTS = [
-  { icon: '📋', file: 'TASK HISTORY', tip: 'Some duties were never meant to be completed.' },
-  { icon: '👤', file: 'CREW PROFILE', tip: 'Numbers don\'t lie — but people do.' },
-  { icon: '💬', file: 'MESSAGE HISTORY', tip: 'Words exchanged in private rarely stay that way.' },
-  { icon: '🔐', file: 'ACCESS LOG', tip: 'Every door opened leaves a trace.' },
+  { icon: '📋', file: 'TASK HISTORY', tip: 'Cross-check completed tasks with who was actually authorized.' },
+  { icon: '👤', file: 'CREW PROFILE', tip: 'Role and clearance are not enough on their own.' },
+  { icon: '💬', file: 'MESSAGE HISTORY', tip: 'Timestamps can reveal who was lying.' },
+  { icon: '🔐', file: 'ACCESS LOG', tip: 'Denied entries are the strongest evidence.' },
 ];
 
 function getViewerData(crewmateId, folderKey) {
@@ -38,6 +40,7 @@ function getViewerData(crewmateId, folderKey) {
     case 'personalProfile': return getPersonalProfile(crewmateId);
     case 'messageHistory': return getMessageHistory(crewmateId);
     case 'accessLog': return getAccessLog(crewmateId);
+    case 'shipRegulations': return SHIP_REGULATIONS;
     default: return null;
   }
 }
@@ -421,11 +424,16 @@ export default function FolderViewer({ crewmate, initialFolder, onBack, onRoundC
           <ul className="fv-files-list">
             {FILE_FOLDERS.map(f => (
               <li key={f.key}>
-                <button className={`fv-file-item ${activeFolder === f.key ? 'active' : ''}`} onClick={() => setActiveFolder(f.key)}>
+                <button className={`fv-file-item ${activeFolder === f.key ? 'active' : ''}`} onClick={() => f.openable && setActiveFolder(f.key)}>
                   {f.name}
                 </button>
               </li>
             ))}
+            <li>
+              <button className={`fv-file-item ${activeFolder === 'shipRegulations' ? 'active' : ''}`} onClick={() => setActiveFolder('shipRegulations')}>
+                Ship Regulations
+              </button>
+            </li>
           </ul>
 
           {/* Evidence hints */}
@@ -468,6 +476,7 @@ export default function FolderViewer({ crewmate, initialFolder, onBack, onRoundC
             {activeFolder === 'personalProfile' && <PersonalProfileView data={viewerData} crewmate={selectedCrewmate} />}
             {activeFolder === 'messageHistory' && <MessageHistoryView data={viewerData} crewmate={selectedCrewmate} />}
             {activeFolder === 'accessLog' && <AccessLogView data={viewerData} />}
+            {activeFolder === 'shipRegulations' && <ShipRegulationsView data={viewerData} />}
           </div>
 
           <div className="fv-accuse-bar">

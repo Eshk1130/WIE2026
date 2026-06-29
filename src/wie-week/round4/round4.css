@@ -299,208 +299,333 @@
     z-index: 20;
 }
 
-/* ── PUZZLE ──────────────────────────────────────────────────── */
+/* ── PUZZLE ─────────────────────────────────────────────────── */
 .r4-puzzle {
     flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.r4-puzzle-bgimg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.r4-puzzle-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    gap: 10px;
+}
+
+/* Title bar — badge centred, reset pinned right */
+.r4-puzzle-title-bar {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.r4-puzzle-title-badge {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(14, 60, 70, 0.92);
+    border: 1.5px solid #5a9ab0;
+    border-radius: 8px;
+    padding: 7px 28px;
+    color: #c8eaf5;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+}
+
+.r4-puzzle-reset {
+    margin-left: auto;
+    background: rgba(14, 60, 70, 0.92);
+    border: 1.5px solid #5a9ab0;
+    border-radius: 8px;
+    padding: 7px 20px;
+    color: #c8eaf5;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.r4-puzzle-reset:hover {
+    background: rgba(30, 90, 110, 0.95);
+    border-color: #8fd0e8;
+}
+
+/* Main area */
+.r4-puzzle-main {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    min-height: 0;
+    align-items: center;
+}
+
+/* Board centred in remaining space */
+.r4-board-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 24px;
+}
+
+.r4-board {
+    position: relative;
+    /* clean teal board — no individual slot boxes */
+    background: rgba(12, 55, 65, 0.80);
+    border: 2px solid #3a8a9a;
+    border-radius: 12px;
+    width: 408px;
+    height: 408px;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+/* Snap zones — completely invisible by default */
+.r4-snap-zone {
+    position: absolute;
+    pointer-events: none;
+    border: none;
+    background: transparent;
+    transition: background 0.15s;
+}
+
+/* Only show a subtle highlight when dragging nearby */
+.r4-snap-zone--highlight {
+    background: rgba(57, 255, 20, 0.12);
+    border: 2px dashed rgba(57, 255, 20, 0.5);
+    border-radius: 4px;
+}
+
+.r4-snap-zone--filled {
+    background: transparent;
+    border: none;
+}
+
+/* Pieces */
+.r4-piece {
+    position: absolute;
+    cursor: grab;
+    image-rendering: -webkit-optimize-contrast;
+    transition: filter 0.1s, transform 0.1s;
+}
+
+.r4-piece--dragging {
+    cursor: grabbing;
+    filter: brightness(1.25);
+    transform: scale(1.03);
+}
+
+.r4-piece--placed {
+    cursor: default;
+    pointer-events: none;
+}
+
+.r4-piece--block {
+    border: 1.5px solid rgba(90, 200, 232, 0.4);
+    border-radius: 3px;
+    opacity: 0.92;
+}
+
+.r4-tray-block {
+    width: 70%;
+    height: 28px;
+    border-radius: 4px;
+    border: 1px solid rgba(90, 200, 232, 0.3);
+    flex-shrink: 0;
+}
+
+/* ── QR OVERLAY ─────────────────────────────────────── */
+.r4-board--complete {
+    box-shadow: 0 0 40px rgba(57, 255, 20, 0.8), 0 0 80px rgba(57, 255, 20, 0.4);
+    border-color: #39ff14;
+    transition: box-shadow 0.6s ease, border-color 0.6s ease;
+}
+
+.r4-qr-overlay {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
-    min-height: 0;
-    background: #04070b;
+    background: rgba(4, 20, 25, 0.88);
+    border-radius: 10px;
+    z-index: 50;
+    animation: r4-qr-fade-in 0.8s ease-out forwards;
 }
 
-.r4-puzzle-layout {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-    max-width: 900px;
-    width: 100%;
-    max-height: calc(100vh - 2rem);
+@keyframes r4-qr-fade-in {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
-/* Tray */
-.r4-tray {
-    width: 200px;
-    flex-shrink: 0;
-    background: rgba(8, 16, 30, 0.9);
-    border: 1px solid rgba(42, 122, 170, 0.3);
-    border-radius: 8px;
-    padding: 16px;
+.r4-qr-img {
+    width: 65%;
+    height: 65%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 20px rgba(57, 255, 20, 0.7));
+}
+
+.r4-qr-answer-wrap {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: r4-qr-fade-in 0.6s ease-out forwards;
+    width: 100%;
+    max-width: 408px;
+}
+
+.r4-qr-answer-hint {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: rgba(90, 200, 232, 0.7);
+    margin: 0;
+}
+
+.r4-audio-row {
+    display: flex;
     gap: 8px;
-    max-height: calc(100vh - 4rem);
+    width: 100%;
+}
+
+.r4-code-input {
+    flex: 1;
+    background: rgba(4, 8, 18, 0.9);
+    border: 1px solid rgba(42, 122, 170, 0.5);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: #c0d8f0;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.r4-code-input:focus { border-color: rgba(90, 200, 232, 0.7); }
+.r4-code-input--ok { border-color: rgba(57, 255, 20, 0.7) !important; color: #39ff14; }
+.r4-code-input--err { border-color: rgba(255, 50, 80, 0.7) !important; color: #ff3050; }
+
+.r4-feedback { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; }
+.r4-feedback--ok { color: #39ff14; }
+.r4-feedback--err { color: #ff3050; }
+
+/* Side panel */
+.r4-side-panel {
+    width: 130px;
+    flex-shrink: 0;
+    background: rgba(8, 45, 58, 0.92);
+    border: 2px solid #5aabbb;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 8px;
+    gap: 6px;
+    align-self: stretch;
     overflow-y: auto;
 }
 
-.r4-tray-title {
+.r4-side-panel-title {
+    text-align: center;
+    color: #c8eaf5;
     font-family: 'Orbitron', monospace;
-    font-size: 0.55rem;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.2em;
-    color: #2a7aaa;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(42, 122, 170, 0.2);
+    letter-spacing: 0.25em;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(90, 171, 187, 0.3);
+    flex-shrink: 0;
 }
 
-.r4-tray-subtitle {
-    font-size: 0.6rem;
-    color: rgba(42, 122, 170, 0.5);
-    letter-spacing: 0.05em;
+.r4-progress-bar-wrap {
+    height: 3px;
+    background: rgba(42, 100, 120, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
-.r4-tray-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.r4-progress-bar {
+    height: 100%;
+    background: #39ff14;
+    border-radius: 2px;
+    transition: width 0.4s;
 }
 
-.r4-tray-piece {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: 5px;
-    border: 1px solid rgba(42, 122, 170, 0.2);
-    background: rgba(15, 30, 55, 0.5);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.r4-tray-piece:hover {
-    border-color: rgba(90, 200, 232, 0.5);
-    background: rgba(25, 60, 100, 0.5);
-}
-
-.r4-tray-piece--placed {
-    border-color: rgba(57, 255, 20, 0.5);
-    background: rgba(10, 50, 10, 0.5);
-    opacity: 0.7;
-}
-
-.r4-tray-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.5rem;
-    color: #6a9ab8;
-    flex: 1;
-}
-
-.r4-tray-status {
-    font-size: 0.6rem;
-    color: #39ff14;
-}
-
-/* Assembly */
-.r4-assembly {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    min-width: 0;
-}
-
-.r4-assembly-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.3em;
-    color: #5ac8e8;
-    text-shadow: 0 0 20px rgba(90, 200, 232, 0.5);
-}
-
-.r4-qr-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 80px);
-    grid-template-rows: repeat(4, 80px);
-    gap: 4px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(42, 122, 170, 0.3);
-}
-
-.r4-qr-cell {
-    border-radius: 4px;
+/* Tray slots — no visible box, just the thumbnail */
+.r4-tray-slot {
+    width: 100%;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.3s;
+}
+
+.r4-tray-slot--placed {
+    opacity: 0.25;
+}
+
+.r4-tray-thumb {
+    max-width: 100%;
+    max-height: 40px;
+    object-fit: contain;
+    pointer-events: none;
+    display: block;
+}
+
+.r4-tray-check {
+    font-size: 14px;
+    color: #39ff14;
+}
+
+/* Fragment piece images on map */
+.r4-fragment-piece-wrap {
+    width: 36px;
+    height: 36px;
+    background: rgba(12, 55, 65, 0.85);
+    border: 1.5px solid #39ff14;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
     overflow: hidden;
 }
 
-.r4-qr-cell--piece {
-    background: rgba(10, 20, 40, 0.8);
-    border: 1px solid rgba(42, 122, 170, 0.2);
-}
-
-.r4-qr-cell--empty {
-    background: transparent;
-}
-
-.r4-qr-missing {
-    width: 72px;
-    height: 72px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Orbitron', monospace;
-    font-size: 1.2rem;
-    color: rgba(42, 122, 170, 0.3);
-    border: 1px dashed rgba(42, 122, 170, 0.2);
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.r4-qr-missing:hover {
-    color: rgba(90, 200, 232, 0.6);
-    border-color: rgba(90, 200, 232, 0.4);
-}
-
-.r4-assembly-hint {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
-    color: rgba(42, 122, 170, 0.6);
-    letter-spacing: 0.2em;
-}
-
-.r4-assembled-msg {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    animation: r4-fade-in 0.5s ease-out;
-}
-
-@keyframes r4-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.r4-assembled-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #39ff14;
-    letter-spacing: 0.3em;
-    text-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
-}
-
-.r4-assembled-sub {
-    font-size: 0.85rem;
-    color: #6a9ab8;
-    max-width: 320px;
-    line-height: 1.5;
-    margin: 0;
+.r4-fragment-piece-img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
 }
 
 /* ── AUDIO ───────────────────────────────────────────────────── */

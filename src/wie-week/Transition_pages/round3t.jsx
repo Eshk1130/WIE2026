@@ -5,7 +5,7 @@ export default function Round3T({ onStart }) {
         <RoundGuidelines
             roundNum={3}
             label="TASK"
-            title="HACK AMONG US"
+            title="BENEATH THE INTERFACE"
             accent="#c51111"
             icon="☣"
             description={

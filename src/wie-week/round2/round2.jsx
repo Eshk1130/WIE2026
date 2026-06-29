@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getRound2Modules } from '../api';
 import './round2.css';
 import electricalBg from './assets/electricalBg.png';
@@ -90,6 +90,7 @@ export default function Round2({ onComplete }) {
   const [answers, setAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
   const [input, setInput] = useState('');
+  const [showCode, setShowCode] = useState(false);
 
   useEffect(() => {
     getRound2Modules().then(data => {
@@ -132,15 +133,19 @@ export default function Round2({ onComplete }) {
   function submitAnswer() {
     const trimmed = input.trim();
     if (!trimmed) return;
-    const correct = trimmed === q.bug.trim() ||
-      trimmed.replace(/\s+/g, ' ') === q.bug.replace(/\s+/g, ' ');
+    const correct = trimmed === q.answer.trim();
     setAnswers(p => ({ ...p, [key]: trimmed }));
     setFeedback(p => ({ ...p, [key]: correct ? 'ok' : 'err' }));
-    if (correct && qIdx < mod.questions.length - 1) {
-      setTimeout(() => {
-        setActiveQ(qIdx + 1);
-        setInput('');
-      }, 800);
+    if (correct) {
+      const allSolved = mod.questions.every((_, qi) => {
+        const k = `${activeModule}-${qi}`;
+        return qi === qIdx ? true : feedback[k] === 'ok';
+      });
+      if (allSolved) {
+        setTimeout(() => setShowCode(true), 600);
+      } else if (qIdx < mod.questions.length - 1) {
+        setTimeout(() => { setActiveQ(qIdx + 1); setInput(''); }, 800);
+      }
     }
   }
 
@@ -372,11 +377,11 @@ export default function Round2({ onComplete }) {
                 <div className="r2-panel r2-panel--br" style={{ flexShrink: 0 }}>
                   <GoldStars stars={PANEL_STARS.answer} />
                   <div className="r2-panel-inner" style={{ gap: 6 }}>
-                    <div className="r2-answer-label">YOUR ANSWER</div>
+                    <div className="r2-answer-label">WHAT IS THE OUTPUT?</div>
                     <textarea
                       className="r2-answer-input"
                       rows={2}
-                      placeholder="Type the buggy line exactly..."
+                      placeholder="Enter the single-digit output..."
                       value={input}
                       readOnly={isCorrect}
                       onChange={e => { setInput(e.target.value); setFeedback(p => ({ ...p, [key]: undefined })); }}
@@ -455,36 +460,164 @@ export default function Round2({ onComplete }) {
         </div>
       </div>
 
-      {selectedModule && modSolved(selectedModule) && onComplete && (
-        <NavigatingOverlay onDone={onComplete} label="MODULE RESTORED" />
+      {showCode && selectedModule && (
+        <CodePopup
+          mod={mod}
+          answers={answers}
+          activeModule={activeModule}
+          onContinue={onComplete}
+        />
       )}
     </>
   );
 }
 
-function NavigatingOverlay({ onDone, label = 'TASK COMPLETE' }) {
-  const [count, setCount] = useState(3);
-  useEffect(() => {
-    const t = setInterval(() => setCount(c => c - 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-  useEffect(() => { if (count <= 0) onDone(); }, [count, onDone]);
+function CodePopup({ mod, answers, activeModule, onContinue }) {
+  const digits = [0, 1, 2, 3].map(qi => answers[`${activeModule}-${qi}`] ?? '?');
+  const code = digits.join('');
+
+  const [entry, setEntry] = useState(['', '', '', '']);
+  const [status, setStatus] = useState('idle');
+  const inputRefs = useRef([]);
+
+  const handleDigit = (i, val) => {
+    if (!/^[A-Za-z0-9]?$/.test(val)) return;
+    const next = [...entry];
+    next[i] = val;
+    setEntry(next);
+    setStatus('idle');
+    if (val && i < 3) inputRefs.current[i + 1]?.focus();
+  };
+
+  const handleKeyDown = (i, e) => {
+    if (e.key === 'Backspace' && !entry[i] && i > 0) {
+      inputRefs.current[i - 1]?.focus();
+    }
+    if (e.key === 'Enter') handleSubmit();
+  };
+
+  const handleSubmit = () => {
+    const attempt = entry.join('').toUpperCase();
+    if (attempt.length < 4) return;
+    if (attempt === code.toUpperCase()) {
+      setStatus('ok');
+    } else {
+      setStatus('err');
+      setTimeout(() => {
+        setStatus('idle');
+        setEntry(['', '', '', '']);
+        inputRefs.current[0]?.focus();
+      }, 1200);
+    }
+  };
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 99999,
-      background: 'rgba(4,5,15,0.93)',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      gap: '1.5rem',
+      background: 'rgba(4,5,15,0.7)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '1rem',
     }}>
-      <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: 'clamp(0.6rem,2vw,1rem)', color: '#39ff14', letterSpacing: '0.2em', textShadow: '0 0 20px rgba(57,255,20,0.7)' }}>
-        ✓ {label}
-      </div>
-      <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: 'clamp(0.45rem,1.2vw,0.7rem)', color: '#38fedc', letterSpacing: '0.15em', opacity: 0.85 }}>
-        NAVIGATING TO NEXT TASK...
-      </div>
-      <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: 'clamp(1.5rem,6vw,3.5rem)', color: '#38fedc', textShadow: '0 0 30px rgba(56,254,220,0.8)' }}>
-        {count > 0 ? count : ''}
+      <div style={{
+        background: 'linear-gradient(140deg, rgba(14,18,40,0.97), rgba(6,8,22,0.98))',
+        border: `1px solid ${mod.col}`,
+        borderRadius: '1rem',
+        padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+        maxWidth: 480,
+        width: '100%',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', gap: '1.25rem',
+        boxShadow: `0 0 60px ${mod.col}33, 0 0 30px rgba(0,0,0,0.6)`,
+      }}>
+        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: 'clamp(0.5rem,1.5vw,0.8rem)', color: '#39ff14', letterSpacing: '0.3em' }}>MODULE RESTORED</div>
+        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: 'clamp(0.4rem,1.2vw,0.65rem)', color: mod.col, letterSpacing: '0.15em' }}>{mod.lang} — ALL 4 OUTPUTS FOUND</div>
+
+        <div style={{
+          background: 'rgba(255,200,0,0.07)',
+          border: '1px solid rgba(255,200,0,0.25)',
+          borderRadius: 10,
+          padding: '14px 20px',
+          textAlign: 'center',
+        }}>
+          <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '0.45rem', color: '#ffc800', letterSpacing: '0.15em', marginBottom: 8 }}>HINT</div>
+          <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '0.85rem', color: '#ccc', lineHeight: 1.6 }}>
+            Four outputs. Four locks. The ship gave them to you in sequence, and only the sequence matters now.
+            <br />
+            <strong style={{ color: '#ffc800' }}>Recall the answers you found, then place them back in the order that mattered to the system.</strong>
+          </div>
+        </div>
+
+        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '0.45rem', color: '#5ac8e8', letterSpacing: '0.2em' }}>
+          ENTER ACCESS CODE
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {entry.map((d, i) => (
+            <input
+              key={i}
+              ref={el => { inputRefs.current[i] = el; }}
+              type="text"
+              inputMode="text"
+              maxLength={1}
+              value={d}
+              onChange={e => handleDigit(i, e.target.value)}
+              onKeyDown={e => handleKeyDown(i, e)}
+              disabled={status === 'ok'}
+              style={{
+                width: '52px', height: '64px',
+                background: 'rgba(56,254,220,0.06)',
+                border: `2px solid ${status === 'ok' ? '#39ff14' : status === 'err' ? '#ff3030' : 'rgba(56,254,220,0.4)'}`,
+                borderRadius: '8px',
+                color: status === 'ok' ? '#39ff14' : status === 'err' ? '#ff5050' : '#38fedc',
+                fontSize: '1.6rem',
+                textAlign: 'center',
+                fontFamily: "'Press Start 2P', monospace",
+                outline: 'none',
+                boxShadow: status === 'ok' ? '0 0 20px rgba(57,255,20,0.5)' : status === 'err' ? '0 0 20px rgba(255,0,0,0.5)' : 'none',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
+              }}
+            />
+          ))}
+        </div>
+
+        {status === 'err' && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '0.45rem', color: '#ff3030', letterSpacing: '0.15em' }}>INCORRECT SEQUENCE</div>}
+        {status === 'ok' && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '0.45rem', color: '#39ff14', letterSpacing: '0.15em' }}>ACCESS GRANTED</div>}
+
+        {status !== 'ok' ? (
+          <button
+            onClick={handleSubmit}
+            disabled={entry.join('').length < 4}
+            style={{
+              fontFamily: "'Press Start 2P',monospace", fontSize: '0.55rem',
+              padding: '12px 32px',
+              background: entry.join('').length === 4 ? 'rgba(56,254,220,0.15)' : 'rgba(100,100,100,0.1)',
+              border: `2px solid ${entry.join('').length === 4 ? '#38fedc' : '#444'}`,
+              borderRadius: 8,
+              color: entry.join('').length === 4 ? '#38fedc' : '#555',
+              cursor: entry.join('').length === 4 ? 'pointer' : 'not-allowed',
+              letterSpacing: '0.1em',
+              transition: 'all 0.2s',
+            }}
+          >
+            SUBMIT
+          </button>
+        ) : (
+          <button
+            onClick={onContinue}
+            style={{
+              fontFamily: "'Press Start 2P',monospace", fontSize: '0.55rem',
+              padding: '12px 32px',
+              background: 'rgba(56,254,220,0.15)',
+              border: '2px solid #38fedc',
+              borderRadius: 8, color: '#38fedc',
+              cursor: 'pointer', letterSpacing: '0.1em',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={e => e.currentTarget.style.background = 'rgba(56,254,220,0.3)'}
+            onMouseOut={e => e.currentTarget.style.background = 'rgba(56,254,220,0.15)'}
+          >
+            CONTINUE MISSION →
+          </button>
+        )}
       </div>
     </div>
   );

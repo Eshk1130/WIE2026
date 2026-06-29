@@ -73,30 +73,29 @@ function DebrisField() {
 let hasLoggedSysMsg = false;
 
 export default function Round3({ onComplete }) {
+  const HIDDEN_KEY = 'SABOTAGE-DEFEATED';
   const [input, setInput] = useState('');
   const [status, setStatus] = useState('idle');
   const [seq, setSeq] = useState([]);
   const [toastMsg, setToastMsg] = useState('');
-  const [crew, setCrew] = useState([]);
-
-  useEffect(() => {
+  const [crew] = useState(() => {
     const savedTeam = localStorage.getItem('team_players');
     if (savedTeam) {
       try {
-        setCrew(JSON.parse(savedTeam));
+        return JSON.parse(savedTeam);
       } catch (e) {
-        console.error("Failed to parse team_players from local storage", e);
+        console.error('Failed to parse team_players from local storage', e);
       }
-    } else {
-      setCrew([
-        { id: 'p1', name: 'Player 1', color: 'blue', img: crewBlue },
-        { id: 'p2', name: 'Player 2', color: 'green', img: crewGreen },
-      ]);
     }
-  }, []);
+
+    return [
+      { id: 'p1', name: 'Player 1', color: 'blue', img: crewBlue },
+      { id: 'p2', name: 'Player 2', color: 'green', img: crewGreen },
+    ];
+  });
 
   useEffect(() => {
-    localStorage.setItem('override_protocol_key', 'SABOTAGE-DEFEATED-WIE2026');
+    localStorage.setItem('override_protocol_key', HIDDEN_KEY);
 
     if (!hasLoggedSysMsg) {
       console.log("%c[SYSTEM MESSAGE RECIEVED]", "color: #5ac8e8; font-weight: bold; font-size: 14px;");
@@ -130,7 +129,7 @@ export default function Round3({ onComplete }) {
   }, []);
 
   const handleSubmit = () => {
-    if (input.trim().toUpperCase() === 'SABOTAGE-DEFEATED-WIE2026') {
+    if (input.trim().toUpperCase() === HIDDEN_KEY.toUpperCase()) {
       setStatus('ok');
     } else {
       setStatus('err');
@@ -145,7 +144,7 @@ export default function Round3({ onComplete }) {
     setSeq(newSeq);
     if (newSeq.length === 3 && newSeq.map(c => c.side).join(',') === 'left,left,right') {
       if (now - newSeq[0].time <= 3000) {
-        setToastMsg("SECURITY OVERRIDE GRANTED\nOverride Key: SABOTAGE-DEFEATED-WIE2026\n\n(O2 Scrubbers re-engaged. Access restored.)");
+        setToastMsg(`SECURITY OVERRIDE GRANTED\nOverride Key: ${HIDDEN_KEY}\n\n(O2 Scrubbers re-engaged. Access restored.)`);
         setTimeout(() => setToastMsg(''), 5000);
         setSeq([]);
       } else {

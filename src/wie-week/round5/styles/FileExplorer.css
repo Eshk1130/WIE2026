@@ -82,10 +82,24 @@
   background: #f0f4ff;
 }
 
+.fe-row.is-disabled {
+  cursor: default;
+  opacity: 0.75;
+  background: #f7f7f7;
+}
+
+.fe-row.is-disabled:hover {
+  background: #f7f7f7;
+}
+
 .fe-row-name {
   font-weight: 500;
   color: #222;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
 
 .fe-row-date,
 .fe-row-type,

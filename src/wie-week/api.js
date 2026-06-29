@@ -1,4 +1,4 @@
-/**
+﻿/**
  * api.js — WIE Week Game API
  *
  * MOCK_MODE = true  → returns local data instantly (no network)
@@ -41,287 +41,46 @@ const MOCK_ROUND1_QUESTIONS = [
   { q: 'Which of these is NOT an OOP concept?',                opts: ['Encapsulation', 'Polymorphism', 'Compilation', 'Inheritance'],                                                          ans: 2 },
 ];
 
-// ─── Round 2 — Bug-Hunt Modules ────────────────────────────────────────────
-/**
- * @typedef {{ t: string, c?: 'cm'|'kw'|'fn', bug?: boolean }} CodeLine
- * @typedef {{ title: string, lines: CodeLine[], bug: string, hint: string }} R2Question
- * @typedef {{ id: number, lang: string, icon: string, col: string, rgb: string, questions: R2Question[] }} R2Module
- */
+// ─── Round 2 — Output Prediction Modules ────────────────────────────────────
+// Each question has a single-digit `answer`. The 4 answers form a 4-digit code.
 const MOCK_ROUND2_MODULES = [
   {
     id: 1, lang: 'C++', icon: '⚙', col: '#00b4ff', rgb: '0,180,255',
     questions: [
-      {
-        title: 'MODULE: POWER ROUTER',
-        lines: [
-          { c: 'cm', t: '// Find max element in array' },
-          { c: 'kw', t: '#include <iostream>' },
-          { c: 'kw', t: 'using namespace std;' },
-          { t: '' },
-          { c: 'fn', t: 'int findMax(int arr[], int n) {' },
-          { t: '    int max = 0;', bug: true },
-          { t: '    for (int i = 0; i < n; i++) {' },
-          { t: '        if (arr[i] > max)' },
-          { t: '            max = arr[i];' },
-          { t: '    }' },
-          { t: '    return max;' },
-          { t: '}' },
-        ],
-        bug: 'int max = 0;',
-        hint: 'What if all elements are negative?',
-      },
-      {
-        title: 'MODULE: POWER ROUTER',
-        lines: [
-          { c: 'cm', t: '// Reverse a string' },
-          { t: '' },
-          { c: 'fn', t: 'string reverse(string s) {' },
-          { t: '    int n = s.length();' },
-          { t: '    for (int i = 0; i < n; i++) {', bug: true },
-          { t: '        swap(s[i], s[n-i-1]);' },
-          { t: '    }' },
-          { t: '    return s;' },
-          { t: '}' },
-        ],
-        bug: 'for (int i = 0; i < n; i++) {',
-        hint: "You're swapping each pair twice.",
-      },
-      {
-        title: 'MODULE: POWER ROUTER',
-        lines: [
-          { c: 'cm', t: '// Check palindrome' },
-          { t: '' },
-          { c: 'fn', t: 'bool isPalin(string s) {' },
-          { t: '    int l = 0, r = s.length();', bug: true },
-          { t: '    while (l < r) {' },
-          { t: '        if (s[l] != s[r]) return false;' },
-          { t: '        l++; r--;' },
-          { t: '    }' },
-          { t: '    return true;' },
-          { t: '}' },
-        ],
-        bug: 'int l = 0, r = s.length();',
-        hint: 'Off-by-one: length vs last index.',
-      },
-      {
-        title: 'MODULE: POWER ROUTER',
-        lines: [
-          { c: 'cm', t: '// Sum of digits' },
-          { t: '' },
-          { c: 'fn', t: 'int sumDigits(int n) {' },
-          { t: '    int sum = 0;' },
-          { t: '    while (n > 0) {' },
-          { t: '        sum += n % 10;' },
-          { t: '        n = n / 10;', bug: true },
-          { t: '    }' },
-          { t: '    return sum;' },
-          { t: '}' },
-        ],
-        bug: 'n = n / 10;',
-        hint: 'Integer division truncates — is that the bug here? Check negative n.',
-      },
+      { title: 'Q1 — POWER ROUTER', lines: [{ c: 'cm', t: '// What is the output?' }, { t: '' }, { c: 'fn', t: 'int main() {' }, { t: '    int x = 1 + 2;' }, { t: '    cout << x;' }, { t: '}' }], answer: '3' },
+      { title: 'Q2 — POWER ROUTER', lines: [{ c: 'cm', t: '// What is the output?' }, { t: '' }, { c: 'fn', t: 'int main() {' }, { t: '    int x = 3;' }, { t: '    x *= 2;' }, { t: '    cout << x;' }, { t: '}' }], answer: '6' },
+      { title: 'Q3 — POWER ROUTER', lines: [{ c: 'cm', t: '// What is the output?' }, { t: '' }, { c: 'fn', t: 'int main() {' }, { t: '    cout << 10 / 5;' }, { t: '}' }], answer: '2' },
+      { title: 'Q4 — POWER ROUTER', lines: [{ c: 'cm', t: '// What is the output?' }, { t: '' }, { c: 'fn', t: 'int main() {' }, { t: '    int a = 5, b = 3;' }, { t: '    cout << a + b;' }, { t: '}' }], answer: '8' },
     ],
   },
   {
     id: 2, lang: 'C', icon: '⚡', col: '#ff3232', rgb: '255,50,50',
     questions: [
-      {
-        title: 'MODULE: CIRCUIT CALIBRATOR',
-        lines: [
-          { c: 'cm', t: '/* Factorial using recursion */' },
-          { t: '' },
-          { c: 'fn', t: 'int factorial(int n) {' },
-          { t: '    if (n == 0) return 0;', bug: true },
-          { t: '    return n * factorial(n - 1);' },
-          { t: '}' },
-        ],
-        bug: 'if (n == 0) return 0;',
-        hint: 'Base case is wrong. 0! = 1, not 0.',
-      },
-      {
-        title: 'MODULE: CIRCUIT CALIBRATOR',
-        lines: [
-          { c: 'cm', t: '/* Swap two integers */' },
-          { t: '' },
-          { c: 'fn', t: 'void swap(int *a, int *b) {' },
-          { t: '    int temp = *a;' },
-          { t: '    *a = *b;' },
-          { t: '    *b = temp;' },
-          { t: '    printf("%d %d", a, b);', bug: true },
-          { t: '}' },
-        ],
-        bug: 'printf("%d %d", a, b);',
-        hint: 'Printing addresses, not values. Missing dereference.',
-      },
-      {
-        title: 'MODULE: CIRCUIT CALIBRATOR',
-        lines: [
-          { c: 'cm', t: '/* Count vowels in string */' },
-          { t: '' },
-          { c: 'fn', t: 'int countVowels(char *s) {' },
-          { t: '    int count = 0;' },
-          { t: "    for (int i = 0; s[i] != '\\0'; i++) {" },
-          { t: '        if (strchr("aeiou", s[i]))' },
-          { t: '            count++;' },
-          { t: '    }' },
-          { t: '    return count + 1;', bug: true },
-          { t: '}' },
-        ],
-        bug: 'return count + 1;',
-        hint: 'Off by one in return value.',
-      },
-      {
-        title: 'MODULE: CIRCUIT CALIBRATOR',
-        lines: [
-          { c: 'cm', t: '/* Binary search */' },
-          { t: '' },
-          { c: 'fn', t: 'int bSearch(int a[], int n, int x) {' },
-          { t: '    int l=0, r=n;', bug: true },
-          { t: '    while (l <= r) {' },
-          { t: '        int m = (l+r)/2;' },
-          { t: '        if (a[m]==x) return m;' },
-          { t: '        if (a[m]<x) l=m+1;' },
-          { t: '        else r=m-1;' },
-          { t: '    }' },
-          { t: '    return -1;' },
-          { t: '}' },
-        ],
-        bug: 'int l=0, r=n;',
-        hint: 'r should be n-1, not n.',
-      },
+      { title: 'Q1 — CIRCUIT CAL', lines: [{ c: 'cm', t: '/* What is the output? */' }, { t: '' }, { c: 'fn', t: 'int main() {' }, { t: '    printf("%d", 2 * 2);' }, { t: '}' }], answer: '4' },
+      { title: 'Q2 — CIRCUIT CAL', lines: [{ c: 'cm', t: '/* What is the output? */' }, { t: '' }, { c: 'fn', t: 'int main() {' }, { t: '    int x = 10;' }, { t: '    printf("%d", x - 3);' }, { t: '}' }], answer: '7' },
+      { title: 'Q3 — CIRCUIT CAL', lines: [{ c: 'cm', t: '/* What is the output? */' }, { t: '' }, { c: 'fn', t: 'int main() {' }, { t: '    printf("%d", 5 / 5);' }, { t: '}' }], answer: '1' },
+      { title: 'Q4 — CIRCUIT CAL', lines: [{ c: 'cm', t: '/* What is the output? */' }, { t: '' }, { c: 'fn', t: 'int main() {' }, { t: '    int a = 2, b = 3;' }, { t: '    printf("%d", a + b);' }, { t: '}' }], answer: '5' },
     ],
   },
   {
     id: 3, lang: 'PYTHON', icon: '🐍', col: '#ffa000', rgb: '255,160,0',
     questions: [
-      {
-        title: 'MODULE: FUSE CONTROLLER',
-        lines: [
-          { c: 'cm', t: '# Fibonacci sequence' },
-          { t: '' },
-          { c: 'fn', t: 'def fibonacci(n):' },
-          { t: '    if n <= 0: return []' },
-          { t: '    if n == 1: return [0]' },
-          { t: '    fibs = [0, 1]' },
-          { t: '    for i in range(2, n):' },
-          { t: '        fibs.append(fibs[-1] + fibs[-2])' },
-          { t: '    return fibs[n]', bug: true },
-        ],
-        bug: 'return fibs[n]',
-        hint: 'Should return the whole list, not one element.',
-      },
-      {
-        title: 'MODULE: FUSE CONTROLLER',
-        lines: [
-          { c: 'cm', t: '# Flatten nested list' },
-          { t: '' },
-          { c: 'fn', t: 'def flatten(lst):' },
-          { t: '    result = []' },
-          { t: '    for item in lst:' },
-          { t: '        if isinstance(item, list):' },
-          { t: '            result.append(flatten(item))', bug: true },
-          { t: '        else:' },
-          { t: '            result.append(item)' },
-          { t: '    return result' },
-        ],
-        bug: 'result.append(flatten(item))',
-        hint: 'Should extend, not append — else nested list added as one element.',
-      },
-      {
-        title: 'MODULE: FUSE CONTROLLER',
-        lines: [
-          { c: 'cm', t: '# Count word frequency' },
-          { t: '' },
-          { c: 'fn', t: 'def word_freq(text):' },
-          { t: '    freq = {}' },
-          { t: '    for word in text.split():' },
-          { t: '        if word in freq:' },
-          { t: '            freq[word] =+ 1', bug: true },
-          { t: '        else:' },
-          { t: '            freq[word] = 1' },
-          { t: '    return freq' },
-        ],
-        bug: 'freq[word] =+ 1',
-        hint: '=+ is not += . Assigns +1 each time instead of incrementing.',
-      },
-      {
-        title: 'MODULE: FUSE CONTROLLER',
-        lines: [
-          { c: 'cm', t: '# Check prime' },
-          { t: '' },
-          { c: 'fn', t: 'def is_prime(n):' },
-          { t: '    if n < 2: return False' },
-          { t: '    for i in range(2, n):', bug: true },
-          { t: '        if n % i == 0:' },
-          { t: '            return False' },
-          { t: '    return True' },
-        ],
-        bug: 'for i in range(2, n):',
-        hint: 'Range should be range(2, int(n**0.5)+1) for efficiency — but is it actually wrong?',
-      },
+      { title: 'Q1 — FUSE CTRL', lines: [{ c: 'cm', t: '# What is the output?' }, { t: '' }, { t: 'print(2 + 3)' }], answer: '5' },
+      { title: 'Q2 — FUSE CTRL', lines: [{ c: 'cm', t: '# What is the output?' }, { t: '' }, { t: 'x = 6 // 2' }, { t: 'print(x)' }], answer: '3' },
+      { title: 'Q3 — FUSE CTRL', lines: [{ c: 'cm', t: '# What is the output?' }, { t: '' }, { t: 'print(3 ** 2)' }], answer: '9' },
+      { title: 'Q4 — FUSE CTRL', lines: [{ c: 'cm', t: '# What is the output?' }, { t: '' }, { t: 'print(8 - 6)' }], answer: '2' },
     ],
   },
   {
     id: 4, lang: 'JAVA', icon: '☕', col: '#ffcc00', rgb: '255,200,0',
     questions: [
-      {
-        title: 'MODULE: POWER DISTRIBUTOR',
-        lines: [
-          { c: 'cm', t: '// String comparison bug' },
-          { t: '' },
-          { c: 'fn', t: 'public boolean areEqual(String a, String b) {' },
-          { t: '    return a == b;', bug: true },
-          { t: '}' },
-        ],
-        bug: 'return a == b;',
-        hint: 'Use .equals() for string comparison in Java.',
-      },
-      {
-        title: 'MODULE: POWER DISTRIBUTOR',
-        lines: [
-          { c: 'cm', t: '// NullPointerException risk' },
-          { t: '' },
-          { c: 'fn', t: 'public int getLength(String s) {' },
-          { t: '    return s.length();', bug: true },
-          { t: '}' },
-          { t: '' },
-          { c: 'cm', t: '// Called with: getLength(null)' },
-        ],
-        bug: 'return s.length();',
-        hint: 'No null check before calling .length().',
-      },
-      {
-        title: 'MODULE: POWER DISTRIBUTOR',
-        lines: [
-          { c: 'cm', t: '// Integer overflow' },
-          { t: '' },
-          { c: 'fn', t: 'public long sumTo(int n) {' },
-          { t: '    long sum = 0;' },
-          { t: '    for (int i = 1; i <= n; i++) {' },
-          { t: '        sum += i * i;', bug: true },
-          { t: '    }' },
-          { t: '    return sum;' },
-          { t: '}' },
-        ],
-        bug: 'sum += i * i;',
-        hint: 'i*i computed as int before adding to long — overflow for large i.',
-      },
-      {
-        title: 'MODULE: POWER DISTRIBUTOR',
-        lines: [
-          { c: 'cm', t: '// Array index out of bounds' },
-          { t: '' },
-          { c: 'fn', t: 'public int last(int[] arr) {' },
-          { t: '    return arr[arr.length];', bug: true },
-          { t: '}' },
-        ],
-        bug: 'return arr[arr.length];',
-        hint: 'Last index is length-1, not length.',
-      },
+      { title: 'Q1 — POWER DIST', lines: [{ c: 'cm', t: '// What is the output?' }, { t: '' }, { c: 'fn', t: 'public static void main(String[] args) {' }, { t: '    System.out.println(3 + 4);' }, { t: '}' }], answer: '7' },
+      { title: 'Q2 — POWER DIST', lines: [{ c: 'cm', t: '// What is the output?' }, { t: '' }, { c: 'fn', t: 'public static void main(String[] args) {' }, { t: '    System.out.println(8 / 2);' }, { t: '}' }], answer: '4' },
+      { title: 'Q3 — POWER DIST', lines: [{ c: 'cm', t: '// What is the output?' }, { t: '' }, { c: 'fn', t: 'public static void main(String[] args) {' }, { t: '    int x = 2; x += 4;' }, { t: '    System.out.println(x);' }, { t: '}' }], answer: '6' },
+      { title: 'Q4 — POWER DIST', lines: [{ c: 'cm', t: '// What is the output?' }, { t: '' }, { c: 'fn', t: 'public static void main(String[] args) {' }, { t: '    System.out.println(5 - 5);' }, { t: '}' }], answer: '0' },
     ],
   },
 ];
-
 // ─── API functions ──────────────────────────────────────────────────────────
 
 /**
