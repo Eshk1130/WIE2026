@@ -61,7 +61,7 @@ function RgCrewmates() {
   );
 }
 
-export default function RoundGuidelines({ roundNum, title, accent = '#38fedc', icon = '◈', description, rules, onStart }) {
+export default function RoundGuidelines({ roundNum, title, accent = '#38fedc', icon = '◈', label = 'ROUND', description, rules, onStart }) {
   return (
     <div className="rg-root" style={{ '--rg-accent': accent }}>
       <RgStarfield />
@@ -70,20 +70,22 @@ export default function RoundGuidelines({ roundNum, title, accent = '#38fedc', i
         <div className="rg-card">
           <div className="rg-round-badge">
             <span className="rg-round-icon">{icon}</span>
-            ROUND {String(roundNum).padStart(2, '0')}
+            {label} {String(roundNum).padStart(2, '0')}
           </div>
           <h1 className="rg-title">{title}</h1>
           <p className="rg-desc">{description}</p>
-          <ul className="rg-rules">
-            {rules.map((r, i) => (
-              <li key={i} className="rg-rule">
-                <span className="rg-rule-num">{String(i + 1).padStart(2, '0')}</span>
-                <span className="rg-rule-text">{r}</span>
-              </li>
-            ))}
-          </ul>
+          {rules && rules.length > 0 && (
+            <ul className="rg-rules">
+              {rules.map((r, i) => (
+                <li key={i} className="rg-rule">
+                  <span className="rg-rule-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="rg-rule-text">{r}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <button className="rg-btn" onClick={onStart}>
-            BEGIN ROUND {String(roundNum).padStart(2, '0')}
+            BEGIN {label} {String(roundNum).padStart(2, '0')}
           </button>
         </div>
       </div>
