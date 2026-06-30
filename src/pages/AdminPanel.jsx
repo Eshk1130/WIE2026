@@ -63,7 +63,7 @@ function auditBadgeClass(eventType) {
 
 // ── Aggregate scoreboard rows from flat score records ─────────────────────────
 function aggregateScoreboard(rawScores) {
-  const map = new Map(); // player_id → { name, email, rounds: {}, totalTime }
+  const map = new Map(); // player_id → { name, email, rounds: {}, roundMeta: {}, totalTime }
 
   rawScores.forEach(row => {
     const pid = row.player_id;
@@ -71,7 +71,7 @@ function aggregateScoreboard(rawScores) {
     const email = row.players?.email ?? '—';
 
     if (!map.has(pid)) {
-      map.set(pid, { player_id: pid, name, email, rounds: {}, totalTime: 0 });
+      map.set(pid, { player_id: pid, name, email, rounds: {}, roundMeta: {}, totalTime: 0 });
     }
     const entry = map.get(pid);
     const rnd = row.round ?? 'unknown';
@@ -79,6 +79,12 @@ function aggregateScoreboard(rawScores) {
     // Keep highest score per round (in case of multiple attempts)
     if (!(rnd in entry.rounds) || (row.score ?? 0) > entry.rounds[rnd]) {
       entry.rounds[rnd] = row.score ?? 0;
+      // ADDED: store correct/wrong counts and time per round for scoreboard
+      entry.roundMeta[rnd] = {
+        correctCount: row.correct_count ?? null,
+        wrongCount: row.wrong_count ?? null,
+        timeSecs: row.time_taken_secs ?? 0,
+      };
     }
     entry.totalTime += (row.time_taken_secs ?? 0);
   });
@@ -269,7 +275,11 @@ function ScoresTab({ scores, loading, error }) {
       Round: s.round ?? '—', Role: s.role ?? '—',
       Survived: s.survived ? 'Yes' : 'No', 'Tasks Done': s.tasks_done ?? 0,
       'Time (s)': s.time_taken_secs ?? '—',
+      // ADDED: new columns in CSV export
+      'Correct Count': s.correct_count ?? '—',
+      'Wrong Count': s.wrong_count ?? '—',
       Evidence: s.evidence_text ?? '',
+      'Question Detail': s.question_detail ? JSON.stringify(s.question_detail) : '',
       'Recorded At': fmtDate(s.recorded_at),
     }));
     exportToCsv('wie2026_scores.csv', rows);
@@ -286,31 +296,29 @@ function ScoresTab({ scores, loading, error }) {
         <div className="ap-table-wrap">
           <table className="ap-table">
             <thead><tr>
-              <th>Player</th><th>Round</th><th>Score</th><th>Role</th>
-              <th>Survived</th><th>Tasks</th><th>Time</th><th>Evidence</th><th>Recorded At</th>
+              <th>Player</th><th>Round</th><th>Score</th>
+              {/* ADDED: Correct/Wrong count columns */}
+              <th>✓ Correct</th><th>✗ Wrong</th>
+              <th>Time</th><th>Evidence</th><th>Recorded At</th>
             </tr></thead>
             <tbody>
-              {scores.map((s, i) => {
-                const roleLC = (s.role ?? '').toLowerCase();
-                return (
-                  <tr key={s.id ?? i}>
-                    <td>{s.players?.display_name ?? '—'}</td>
-                    <td><span className="badge badge-purple" style={{ fontSize: '0.66rem' }}>{s.round ?? '—'}</span></td>
-                    <td><strong>{s.score ?? 0}</strong></td>
-                    <td>{s.role
-                      ? <span className={`badge ${roleLC === 'impostor' ? 'badge-red' : 'badge-blue'}`}>
-                        {roleLC === 'impostor' ? '🔪' : '🧑‍🚀'} {s.role}
-                      </span>
-                      : <span className="ap-cell-dim">—</span>}
-                    </td>
-                    <td>{s.survived === true ? '✅' : s.survived === false ? '💀' : <span className="ap-cell-dim">—</span>}</td>
-                    <td>{s.tasks_done ?? 0}</td>
-                    <td className="ap-cell-secondary">{s.time_taken_secs ? `${s.time_taken_secs}s` : '—'}</td>
-                    <td className="ap-cell-mono" title={s.evidence_text ?? ''}>{trunc(s.evidence_text ?? '', 40)}</td>
-                    <td className="ap-cell-dim">{fmtDate(s.recorded_at)}</td>
-                  </tr>
-                );
-              })}
+              {scores.map((s, i) => (
+                <tr key={s.id ?? i}>
+                  <td>{s.players?.display_name ?? '—'}</td>
+                  <td><span className="badge badge-purple" style={{ fontSize: '0.66rem' }}>{s.round ?? '—'}</span></td>
+                  <td><strong>{s.score ?? 0}</strong></td>
+                  {/* ADDED: correct / wrong counts */}
+                  <td style={{ color: '#4ade80' }}>
+                    {s.correct_count != null ? s.correct_count : <span className="ap-cell-dim">—</span>}
+                  </td>
+                  <td style={{ color: '#f87171' }}>
+                    {s.wrong_count != null ? s.wrong_count : <span className="ap-cell-dim">—</span>}
+                  </td>
+                  <td className="ap-cell-secondary">{s.time_taken_secs ? `${s.time_taken_secs}s` : '—'}</td>
+                  <td className="ap-cell-mono" title={s.evidence_text ?? ''}>{trunc(s.evidence_text ?? '', 40)}</td>
+                  <td className="ap-cell-dim">{fmtDate(s.recorded_at)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -375,7 +383,14 @@ function ScoreboardTab({ rawScores, loading, error }) {
   function handleExport() {
     const csv = rows.map((r, i) => {
       const obj = { Rank: i + 1, Player: r.name, Email: r.email };
-      ROUND_ORDER.forEach(rd => { obj[rd.label] = r.rounds[rd.key] ?? '—'; });
+      ROUND_ORDER.forEach(rd => {
+        obj[rd.label] = r.rounds[rd.key] ?? '—';
+        // ADDED: per-round correct/wrong/time in CSV
+        const meta = r.roundMeta?.[rd.key];
+        obj[`${rd.label} Correct`] = meta?.correctCount ?? '—';
+        obj[`${rd.label} Wrong`] = meta?.wrongCount ?? '—';
+        obj[`${rd.label} Time(s)`] = meta?.timeSecs ?? '—';
+      });
       obj['Total Score'] = r.totalScore;
       obj['Total Time (s)'] = r.totalTime;
       return obj;
@@ -413,6 +428,7 @@ function ScoreboardTab({ rawScores, loading, error }) {
                 <th>Email</th>
                 {ROUND_ORDER.map(r => <th key={r.key}>{r.label}<br /><span style={{ fontWeight: 400, opacity: 0.5 }}>(/{r.max})</span></th>)}
                 <th>Total /60</th>
+                {/* ADDED: per-round time column */}
                 <th>Total Time</th>
               </tr>
             </thead>
@@ -427,11 +443,24 @@ function ScoreboardTab({ rawScores, loading, error }) {
                   </td>
                   <td><strong>{r.name}</strong></td>
                   <td className="ap-cell-secondary">{r.email}</td>
-                  {ROUND_ORDER.map(rd => (
-                    <td key={rd.key} className={`sb-round-cell ${cellClass(rd.key, r.rounds)}`}>
-                      {rd.key in r.rounds ? r.rounds[rd.key] : '—'}
-                    </td>
-                  ))}
+                  {ROUND_ORDER.map(rd => {
+                    const meta = r.roundMeta?.[rd.key];
+                    const score = rd.key in r.rounds ? r.rounds[rd.key] : null;
+                    return (
+                      <td key={rd.key} className={`sb-round-cell ${cellClass(rd.key, r.rounds)}`}>
+                        <div>{score ?? '—'}</div>
+                        {/* ADDED: correct/wrong/time sub-info for round 1; time for others */}
+                        {meta && (
+                          <div style={{ fontSize: '0.6em', opacity: 0.65, lineHeight: 1.3 }}>
+                            {meta.correctCount != null
+                              ? <span>✓{meta.correctCount} ✗{meta.wrongCount}</span>
+                              : null}
+                            {meta.timeSecs ? <span style={{ marginLeft: 2 }}>{meta.timeSecs}s</span> : null}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
                   <td><strong style={{ color: '#a78bfa' }}>{r.totalScore}</strong></td>
                   <td className="ap-cell-secondary">{r.totalTime ? `${r.totalTime}s` : '—'}</td>
                 </tr>

@@ -9,6 +9,11 @@ import AmongUsIcon from './AmongUsIcon';
 import '../styles/FolderViewer.css';
 import '../styles/Viewers.css';
 
+// ADDED: scoring + player context
+import { usePlayerContext } from '../../../lib/PlayerContext.jsx';
+import { submitRoundScore } from '../../../lib/gameService.js';
+import { scorePassFail, validateRound5Code, ROUND_NAMES, startRoundTimer } from '../../../lib/scoringEngine.js';
+
 const REACTOR_CODE = '5503';
 const COUNTDOWN_SECONDS = 3 * 60;
 
@@ -265,6 +270,10 @@ function ShipSavedScreen({ onContinue }) {
 
 /* ── Main FolderViewer ────────────────────────────────────────────────────── */
 export default function FolderViewer({ crewmate, initialFolder, onBack, onRoundComplete }) {
+  // ADDED: player context + round timer
+  const { player, sessionId } = usePlayerContext();
+  const stopRoundTimerRef = useRef(startRoundTimer());
+
   const [selectedCrewmate, setSelectedCrewmate] = useState(crewmate);
   const [activeFolder, setActiveFolder] = useState(initialFolder?.key || 'taskHistory');
   const [wrongFlash, setWrongFlash] = useState(false);
@@ -325,7 +334,25 @@ export default function FolderViewer({ crewmate, initialFolder, onBack, onRoundC
   };
 
   const handleEvidenceCancel = () => setShowEvidencePrompt(false);
-  const handleCodeSuccess = () => { clearInterval(timerRef.current); setPhase('saved'); };
+  const handleCodeSuccess = async () => {
+    clearInterval(timerRef.current);
+    // ADDED: submit 10 points when reactor code (5503) is correct
+    const timeSecs = stopRoundTimerRef.current();
+    if (player?.id && sessionId) {
+      try {
+        await submitRoundScore(player.id, sessionId, {
+          score: scorePassFail(true),
+          round: ROUND_NAMES.ROUND5,
+          time_taken_secs: timeSecs,
+          evidence_text: evidenceText,
+          question_detail: [{ isCorrect: true, reactorCode: '5503', timeSpentSecs: timeSecs }],
+        });
+      } catch (err) {
+        console.error('[Round5] submitRoundScore failed:', err);
+      }
+    }
+    setPhase('saved');
+  };
   const handleReset = () => {
     setTimeLeft(COUNTDOWN_SECONDS);
     setTimerActive(false);

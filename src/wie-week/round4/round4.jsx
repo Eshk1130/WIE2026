@@ -1,4 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+// ADDED: scoring + player context
+import { usePlayerContext } from '../../lib/PlayerContext.jsx';
+import { submitRoundScore } from '../../lib/gameService.js';
+import { scorePassFail, validateRound4Answer, ROUND_NAMES, startRoundTimer } from '../../lib/scoringEngine.js';
 import './round4.css';
 import mapImage from './assets/map.png';
 import navMapImage from './assets/nav_map.png';
@@ -83,6 +87,9 @@ const MAP_H = 3600;
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function Round4({ onComplete }) {
+  // ADDED: player context + round timer (starts on mount)
+  const { player, sessionId } = usePlayerContext();
+  const stopRoundTimerRef = useRef(startRoundTimer());
   const [phase, setPhase] = useState('explore');
   const [collected, setCollected] = useState(new Set());
   const [audioCode, setAudioCode] = useState('');
@@ -340,9 +347,24 @@ export default function Round4({ onComplete }) {
   }, [piecePos]);
 
   // ── Audio ─────────────────────────────────────────────────────────────────
-  const submitCode = () => {
-    if (audioCode.trim().toUpperCase() === 'NEBULA') {
+  // CHANGED: uses validateRound4Answer + scorePassFail + submitRoundScore
+  const submitCode = async () => {
+    const correct = validateRound4Answer(audioCode);
+    if (correct) {
       setCodeStatus('ok');
+      const timeSecs = stopRoundTimerRef.current();
+      if (player?.id && sessionId) {
+        try {
+          await submitRoundScore(player.id, sessionId, {
+            score: scorePassFail(true),
+            round: ROUND_NAMES.ROUND4,
+            time_taken_secs: timeSecs,
+            question_detail: [{ isCorrect: true, answer: audioCode.trim(), timeSpentSecs: timeSecs }],
+          });
+        } catch (err) {
+          console.error('[Round4] submitRoundScore failed:', err);
+        }
+      }
       setTimeout(() => setPhase('complete'), 1200);
     } else {
       setCodeStatus('err');
