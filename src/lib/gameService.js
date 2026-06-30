@@ -21,8 +21,37 @@
 import { supabase } from './supabase.js';
 
 // ── localStorage keys ─────────────────────────────────────────────────────────
-const PLAYER_KEY  = 'wie2026_player';
+const PLAYER_KEY = 'wie2026_player';
 const SESSION_KEY = 'wie2026_session';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// upsertPlayerFromAuth
+// Called immediately after Google OAuth. Creates the player row on first login,
+// or updates display_name / email if the Google profile changed.
+// ─────────────────────────────────────────────────────────────────────────────
+export async function upsertPlayerFromAuth(authUser) {
+  if (!authUser?.id) throw new Error('upsertPlayerFromAuth: no auth user provided.');
+
+  const display_name =
+    authUser.user_metadata?.full_name ||
+    authUser.user_metadata?.name ||
+    authUser.email?.split('@')[0] ||
+    'Crewmate';
+
+  const email = authUser.email ?? null;
+
+  const { data, error } = await supabase
+    .from('players')
+    .upsert(
+      { auth_id: authUser.id, display_name, email, updated_at: new Date().toISOString() },
+      { onConflict: 'auth_id', ignoreDuplicates: false }
+    )
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // joinGame (Auth-based)
@@ -58,7 +87,7 @@ export async function joinGame(authUser) {
     const sessionId = sessionRow.id;
 
     // 3. Persist to localStorage ----------------------------------------------
-    localStorage.setItem(PLAYER_KEY,  JSON.stringify(player));
+    localStorage.setItem(PLAYER_KEY, JSON.stringify(player));
     localStorage.setItem(SESSION_KEY, sessionId);
 
     return { player, sessionId };
@@ -84,8 +113,8 @@ export async function leaveGame(sessionId) {
 
     if (fetchErr) throw fetchErr;
 
-    const loggedInAt   = sessionRow?.logged_in_at ? new Date(sessionRow.logged_in_at) : new Date();
-    const loggedOutAt  = new Date();
+    const loggedInAt = sessionRow?.logged_in_at ? new Date(sessionRow.logged_in_at) : new Date();
+    const loggedOutAt = new Date();
     const durationSecs = Math.round((loggedOutAt - loggedInAt) / 1000);
 
     const { error: updateErr } = await supabase
@@ -109,8 +138,8 @@ export async function leaveGame(sessionId) {
 // ─────────────────────────────────────────────────────────────────────────────
 export function getStoredPlayer() {
   try {
-    const raw       = localStorage.getItem(PLAYER_KEY);
-    const player    = raw ? JSON.parse(raw) : null;
+    const raw = localStorage.getItem(PLAYER_KEY);
+    const player = raw ? JSON.parse(raw) : null;
     const sessionId = localStorage.getItem(SESSION_KEY) || null;
     return { player, sessionId };
   } catch {
@@ -143,16 +172,16 @@ export async function submitRoundScore(playerId, sessionId, {
     const { error } = await supabase
       .from('scores')
       .insert({
-        player_id:      playerId,
-        session_id:     sessionId,
+        player_id: playerId,
+        session_id: sessionId,
         score,
         round,
         role,
-        survived:       survived != null ? !!survived : null,
-        tasks_done:     tasks_done ?? 0,
+        survived: survived != null ? !!survived : null,
+        tasks_done: tasks_done ?? 0,
         time_taken_secs,
         evidence_text,
-        recorded_at:    new Date().toISOString(),
+        recorded_at: new Date().toISOString(),
       });
 
     if (error) throw error;

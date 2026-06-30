@@ -12,7 +12,8 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { joinGame, leaveGame, getStoredPlayer, recordScore } from '../lib/gameService.js';
+import { joinGame, leaveGame, getStoredPlayer, recordScore, upsertPlayerFromAuth } from '../lib/gameService.js';
+import { onAuthChange } from '../lib/auth.js';
 
 export default function usePlayer() {
   const [player,    setPlayer]    = useState(null);
@@ -32,6 +33,27 @@ export default function usePlayer() {
       setSessionId(storedSession);
     }
     setLoading(false);
+  }, []);
+
+  // ── React to live Supabase auth session (handles post-OAuth-callback state) ──
+  useEffect(() => {
+    const unsubscribe = onAuthChange(async (authUser) => {
+      // Only act if we have a Google auth user but no game player yet
+      if (!authUser) return;
+      const { player: storedPlayer } = getStoredPlayer();
+      if (storedPlayer) return; // already have a player, nothing to do
+
+      try {
+        await upsertPlayerFromAuth(authUser);
+        const result = await joinGame(authUser);
+        setPlayer(result.player);
+        setSessionId(result.sessionId);
+      } catch (err) {
+        console.error('[usePlayer] auto-join from auth session failed:', err);
+        // Non-fatal: the JoinGame screen will still show the Google button
+      }
+    });
+    return unsubscribe;
   }, []);
 
   // ── Call leaveGame when the browser tab/window closes ────────────────────

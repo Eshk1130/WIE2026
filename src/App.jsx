@@ -14,7 +14,7 @@
  */
 
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import LandingPage from './wie-week/Landing/LandingPage';
 import HackAmongUs from './wie-week/Transition_pages/HackAmongUs';
@@ -38,8 +38,9 @@ import Finish from './wie-week/Transition_pages/finish';
 
 // ── Supabase / admin imports ──────────────────────────────────────────────────
 import { PlayerProvider } from './lib/PlayerContext.jsx';
-import AdminPanel from './pages/AdminPanel.jsx';
-import JoinGame from './components/JoinGame.jsx';
+import AdminPanel    from './pages/AdminPanel.jsx';
+import AuthCallback  from './pages/AuthCallback.jsx';
+import JoinGame      from './components/JoinGame.jsx';
 
 import './index.css';
 
@@ -124,6 +125,9 @@ export default function App() {
     <PlayerProvider>
       <BrowserRouter>
         <Routes>
+          {/* ── OAuth callback (public — must be before catch-all) ── */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
+
           {/* ── Admin dashboard (password-gated internally) ── */}
           <Route path="/admin" element={<AdminPanel />} />
 
