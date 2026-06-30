@@ -1,11 +1,11 @@
-/* ── Round 5 — The Impostor Files — Mock Data ───────────────────────────── */
+/* ── Round 5 — SKELD-9 Crew Operations Manual — Mock Data ─────────────────── */
 
 const COLORS = {
-  1: '#3ed94e',  // James  — green
-  2: '#f17d2a',  // Sarah  — orange
-  3: '#1d9bf0',  // Daniel — blue
-  4: '#e23636',  // Olivia — red
-  5: '#d9d926',  // Michael — yellow (IMPOSTOR)
+  1: '#3ed94e',  // James Carter  — green
+  2: '#f17d2a',  // Sarah Mitchell — orange
+  3: '#1d9bf0',  // Daniel Brooks  — blue
+  4: '#e23636',  // Olivia Bennett — red
+  5: '#d9d926',  // Michael Foster — yellow (IMPOSTOR)
 };
 
 export const CREWMATES = [
@@ -25,190 +25,223 @@ export const FILE_FOLDERS = [
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TASK HISTORY
+   Fields: { id, task, location, status, date }
    ═══════════════════════════════════════════════════════════════════════════ */
 const TASK_HISTORY = {
+  // ── James Carter (Captain) ──────────────────────────────────────────────
   1: [
-    { id: 'T-101', task: 'Mission Briefing',            location: 'Bridge',         status: 'Completed', date: '08:05' },
-    { id: 'T-102', task: 'Crew Authorization',          location: 'Admin',          status: 'Completed', date: '09:20' },
-    { id: 'T-103', task: 'Communications Check',        location: 'Communications', status: 'Completed', date: '11:10' },
-    { id: 'T-104', task: 'Emergency Broadcast Approval',location: 'Bridge',         status: 'Completed', date: '18:40' },
+    { id: 'T-101', task: 'Calibrate Navigation System', location: 'Bridge',      status: 'Completed', date: '2026-06-01' },
+    { id: 'T-102', task: 'Run Diagnostic on Engines',   location: 'Engine Room', status: 'Completed', date: '2026-06-01' },
+    { id: 'T-103', task: 'Submit Crew Roster Report',   location: 'Admin',       status: 'Completed', date: '2026-06-02' },
+    { id: 'T-104', task: 'Inspect Shield Generator',    location: 'Shields',     status: 'Pending',   date: '2026-06-02' },
   ],
+  // ── Sarah Mitchell (Chief Engineer) ────────────────────────────────────
   2: [
-    { id: 'E-201', task: 'Reactor Calibration', location: 'Reactor',     status: 'Completed', date: '14:05' },
-    { id: 'E-202', task: 'Engine Diagnostics',  location: 'Engine Room', status: 'Completed', date: '15:10' },
-    { id: 'E-203', task: 'Electrical Repair',   location: 'Electrical',  status: 'Completed', date: '16:30' },
-    { id: 'E-204', task: 'Power Grid Test',     location: 'Electrical',  status: 'Completed', date: '17:20' },
+    { id: 'T-201', task: 'Prime Engine Core',     location: 'Engine Room', status: 'Completed', date: '2026-06-01' },
+    { id: 'T-202', task: 'Clear Debris from Vents',location: 'Cafeteria',  status: 'Completed', date: '2026-06-01' },
+    { id: 'T-203', task: 'Fix Wiring Harness',    location: 'Electrical',  status: 'Completed', date: '2026-06-02' },
+    { id: 'T-204', task: 'Divert Power to Shields',location: 'Shields',    status: 'Completed', date: '2026-06-02' },
   ],
+  // ── Daniel Brooks (Navigation Officer) ─────────────────────────────────
   3: [
-    { id: 'N-301', task: 'Navigation Calibration',  location: 'Navigation',     status: 'Completed', date: '10:10' },
-    { id: 'N-302', task: 'Star Map Update',          location: 'Bridge',         status: 'Completed', date: '12:00' },
-    { id: 'N-303', task: 'Communication Relay',      location: 'Communications', status: 'Completed', date: '16:25' },
-    { id: 'N-304', task: 'Flight Path Verification', location: 'Navigation',     status: 'Completed', date: '18:05' },
+    { id: 'T-301', task: 'Chart Course to Sector 7', location: 'Bridge', status: 'Completed', date: '2026-06-01' },
+    { id: 'T-302', task: 'Clean O2 Filters',         location: 'Oxygen', status: 'Pending',   date: '2026-06-01' },
+    { id: 'T-303', task: 'Update Star Maps',          location: 'Bridge', status: 'Completed', date: '2026-06-02' },
+    { id: 'T-304', task: 'Empty Garbage Chute',       location: 'Oxygen', status: 'Completed', date: '2026-06-02' },
   ],
+  // ── Olivia Bennett (Research Scientist) ────────────────────────────────
   4: [
-    { id: 'R-401', task: 'Sample Analysis',       location: 'Laboratory', status: 'Completed', date: '09:15' },
-    { id: 'R-402', task: 'Medical Report',         location: 'MedBay',     status: 'Completed', date: '11:00' },
-    { id: 'R-403', task: 'Specimen Storage',       location: 'Storage',    status: 'Completed', date: '15:30' },
-    { id: 'R-404', task: 'Research Notes Upload',  location: 'Laboratory', status: 'Completed', date: '18:10' },
+    { id: 'T-401', task: 'Analyze Sample Alpha',        location: 'MedBay',  status: 'Completed', date: '2026-06-01' },
+    { id: 'T-402', task: 'Calibrate Specimen Incubator',location: 'MedBay',  status: 'Completed', date: '2026-06-01' },
+    { id: 'T-403', task: 'Refill MedBay Supplies',      location: 'MedBay',  status: 'Completed', date: '2026-06-02' },
+    { id: 'T-404', task: 'Process Radiation Scans',     location: 'Weapons', status: 'Pending',   date: '2026-06-02' },
   ],
+  // ── Michael Foster (Security Officer) — IMPOSTOR ───────────────────────
+  // Breach 1: Reactor entry at 23:40 (past curfew) with ZERO reactor tasks
+  // Breach 2: ID SEC-5503 → digits 5+5+0+3 = 13, outside 10–12 bracket
+  // Breach 3: Message claims "Security Room" view — logs place him in Reactor
   5: [
-    // S-501 and S-504 check out — Security area, access Granted
-    // S-502: claims Reactor Override at Reactor — but access log says DENIED at 14:08
-    // S-503: claims Navigation Update at Navigation — but access log says DENIED at 16:26
-    { id: 'S-501', task: 'Camera Patrol',       location: 'Security',   status: 'Completed', date: '08:30' },
-    { id: 'S-502', task: 'Reactor Override',    location: 'Reactor',    status: 'Completed', date: '14:08' },
-    { id: 'S-503', task: 'Navigation Update',   location: 'Navigation', status: 'Completed', date: '16:26' },
-    { id: 'S-504', task: 'Final Security Sweep',location: 'Security',   status: 'Completed', date: '18:35' },
+    { id: 'T-501', task: 'Review Security Footage', location: 'Security',     status: 'Completed', date: '2026-06-01' },
+    { id: 'T-502', task: 'Calibrate Weapon Cannons',location: 'Weapons',      status: 'Completed', date: '2026-06-01' },
+    { id: 'T-503', task: 'Test Bulkhead Doors',     location: 'Lower Engine', status: 'Completed', date: '2026-06-02' },
+    { id: 'T-504', task: 'Reset Security Firewalls',location: 'Security',     status: 'Completed', date: '2026-06-02' },
   ],
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PERSONAL PROFILES
+   Fields used by PersonalProfileView:
+     crewId, role, certification, department, experience, bloodType, gender,
+     rank, dateJoined, homePlanet, certSuspicious,
+     level, xp, maxXp, rating, ratingPct,
+     gameStats: { gamesPlayed, wins, tasksCompleted }
    ═══════════════════════════════════════════════════════════════════════════ */
 const PERSONAL_PROFILES = {
+  // ── James Carter ──────────────────────────────────────────────────────
   1: {
-    crewId: 'C-001', role: 'Captain', certification: 'Level 5',
-    department: 'Command', experience: '14 Years', emergencyContact: 'Earth Command',
+    crewId: 'CAP-8842', role: 'Captain', rank: 'Captain',
+    certification: 'Level 5 (All-Access)',
+    department: 'Command', experience: '14 Years',
+    dateJoined: '2012-03-15', homePlanet: 'Earth',
     bloodType: 'O+', gender: 'Male',
+    assignedQuarters: 'Cabin A-1',
+    // ID digit sum: 8+8+4+2 = 22  — outside 10-12 bracket but James is NOT the impostor (distraction for digit-only IDs)
     level: 14, xp: 1260, maxXp: 2000, rating: 1000, ratingPct: 'TOP 50%',
     gameStats: { gamesPlayed: 142, wins: 98, tasksCompleted: 1847 },
+    certSuspicious: false,
   },
+  // ── Sarah Mitchell ────────────────────────────────────────────────────
   2: {
-    crewId: 'E-002', role: 'Chief Engineer', certification: 'Level 5',
+    crewId: 'ENG-4419', role: 'Chief Engineer', rank: 'Chief Engineer',
+    certification: 'Level 4',
     department: 'Engineering', experience: '11 Years',
+    dateJoined: '2015-07-22', homePlanet: 'Luna Colony',
     bloodType: 'A-', gender: 'Female',
+    assignedQuarters: 'Cabin B-3',
+    // ID digit sum: 4+4+1+9 = 18 — outside bracket (distraction)
     level: 11, xp: 920, maxXp: 1500, rating: 880, ratingPct: 'TOP 60%',
     gameStats: { gamesPlayed: 110, wins: 72, tasksCompleted: 1350 },
+    certSuspicious: false,
   },
+  // ── Daniel Brooks ─────────────────────────────────────────────────────
   3: {
-    crewId: 'N-003', role: 'Navigation Officer', certification: 'Level 4',
+    crewId: 'NAV-1092', role: 'Navigation Officer', rank: 'Navigation Officer',
+    certification: 'Level 3',
     department: 'Navigation', experience: '8 Years',
+    dateJoined: '2018-01-10', homePlanet: 'Mars Base',
     bloodType: 'B+', gender: 'Male',
+    assignedQuarters: 'Cabin C-2',
+    // ID digit sum: 1+0+9+2 = 12 — within 10-12 (clean)
     level: 8, xp: 1100, maxXp: 1800, rating: 950, ratingPct: 'TOP 55%',
     gameStats: { gamesPlayed: 128, wins: 85, tasksCompleted: 1620 },
+    certSuspicious: false,
   },
+  // ── Olivia Bennett ────────────────────────────────────────────────────
   4: {
-    crewId: 'R-004', role: 'Research Scientist', certification: 'Level 3',
+    crewId: 'SCI-7721', role: 'Research Scientist', rank: 'Research Scientist',
+    certification: 'Level 3',
     department: 'Research', experience: '6 Years',
+    dateJoined: '2020-05-18', homePlanet: 'Earth',
     bloodType: 'AB-', gender: 'Female',
+    assignedQuarters: 'Cabin D-4',
+    // ID digit sum: 7+7+2+1 = 17 — outside bracket (distraction)
     level: 6, xp: 450, maxXp: 1000, rating: 320, ratingPct: 'TOP 90%',
     gameStats: { gamesPlayed: 34, wins: 31, tasksCompleted: 98 },
+    certSuspicious: false,
   },
+  // ── Michael Foster — IMPOSTOR ─────────────────────────────────────────
   5: {
-    crewId: 'S-005', role: 'Security Officer', certification: 'Level 4',
+    crewId: 'SEC-5503', role: 'Security Officer', rank: 'Security Officer',
+    certification: 'Level 4',
     department: 'Security', experience: '9 Years',
+    dateJoined: '2017-09-03', homePlanet: 'Earth',
     bloodType: 'O-', gender: 'Male',
+    assignedQuarters: 'Cabin E-1',
+    // ⚠ Rule 3 BREACH: digit sum 5+5+0+3 = 13 — outside 10-12 bracket
     level: 9, xp: 780, maxXp: 1400, rating: 820, ratingPct: 'TOP 62%',
     gameStats: { gamesPlayed: 96, wins: 63, tasksCompleted: 1180 },
+    certSuspicious: true,  // triggers red highlight in PersonalProfileView
   },
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESSAGE HISTORY  — per-crewmate 1-on-1 threads
-   Structure: { conversations: [{contactId, contactName, lastMsg, time}], chatMessages: {contactId: [{sender, text, time, self}]} }
+   MESSAGE HISTORY
+   Structure:
+     conversations : [{ contactId, contactName, lastMsg, time }]
+     chatMessages  : { contactId: [{ sender, text, time, self?, suspicious? }] }
    ═══════════════════════════════════════════════════════════════════════════ */
-
 const MESSAGE_HISTORY = {
-  // ── James Carter (1) ──────────────────────────────────────────
+
+  // ── James Carter (1) ──────────────────────────────────────────────────
   1: {
     conversations: [
-      { contactId: 2, contactName: 'Sarah Mitchell',  lastMsg: 'Finish before 15:00.', time: '08:42' },
-      { contactId: 5, contactName: 'Michael Foster',  lastMsg: 'Good work.',            time: '18:32' },
-      { contactId: 3, contactName: 'Daniel Brooks',   lastMsg: 'Acknowledged.',         time: '16:07' },
+      { contactId: 2, contactName: 'Sarah Mitchell', lastMsg: 'Logs sent. Engine 2 running hot.',   time: '04:12' },
+      { contactId: 3, contactName: 'Daniel Brooks',  lastMsg: 'Maintain current trajectory.',       time: '06:30' },
     ],
     chatMessages: {
       2: [
-        { sender: 'Sarah',  time: '08:40', text: 'Need reactor maintenance approval.' },
-        { sender: 'James',  time: '08:42', text: 'Approved. Finish before 15:00.', self: true },
-      ],
-      5: [
-        { sender: 'Michael',time: '18:30', text: 'Security sweep complete.' },
-        { sender: 'James',  time: '18:32', text: 'Good work.', self: true },
+        { sender: 'James',  time: '04:00', text: 'Need the engine efficiency metrics by 0400 hours.', self: true },
+        { sender: 'Sarah',  time: '04:12', text: 'Logs sent. Engine 2 is running hot, keeping an eye on it.' },
       ],
       3: [
-        { sender: 'Daniel', time: '16:05', text: 'Course updated successfully.' },
-        { sender: 'James',  time: '16:07', text: 'Acknowledged.', self: true },
+        { sender: 'James',  time: '06:28', text: 'Maintain current trajectory. The storm is clearing up.', self: true },
+        { sender: 'Daniel', time: '06:30', text: 'Course locked. ETA to destination is 48 hours.' },
       ],
     },
   },
 
-  // ── Sarah Mitchell (2) ────────────────────────────────────────
+  // ── Sarah Mitchell (2) ────────────────────────────────────────────────
   2: {
     conversations: [
-      { contactId: 1, contactName: 'James Carter',    lastMsg: 'Starting maintenance.',  time: '08:43' },
-      { contactId: 4, contactName: 'Olivia Bennett',  lastMsg: 'Stable.',                time: '14:12' },
+      { contactId: 1, contactName: 'James Carter',   lastMsg: 'Need engine metrics by 0400.',         time: '04:00' },
+      { contactId: 5, contactName: 'Michael Foster', lastMsg: 'Looks completely normal from here.',   time: '23:42' },
     ],
     chatMessages: {
       1: [
-        { sender: 'James',  time: '08:40', text: 'Reactor authorization granted.' },
-        { sender: 'Sarah',  time: '08:43', text: 'Starting maintenance.', self: true },
+        { sender: 'James',   time: '04:00', text: 'Need the engine efficiency metrics by 0400 hours.' },
+        { sender: 'Sarah',   time: '04:12', text: 'Logs sent. Engine 2 is running hot, keeping an eye on it.', self: true },
       ],
-      4: [
-        { sender: 'Olivia', time: '14:10', text: 'Power stable?' },
-        { sender: 'Sarah',  time: '14:12', text: 'Stable.', self: true },
+      5: [
+        // ⚠ Rule 4 BREACH: Michael claims to be watching cameras ("from here")
+        //   but his Access Log shows he physically entered the Reactor at 23:40.
+        { sender: 'Sarah',   time: '23:41', text: 'Can you check the security feed near the reactor? Heard a weird noise.' },
+        { sender: 'Michael', time: '23:42', text: 'Checked the reactor feed. Everything looks completely normal from here.', suspicious: true },
       ],
     },
   },
 
-  // ── Daniel Brooks (3) ─────────────────────────────────────────
+  // ── Daniel Brooks (3) ─────────────────────────────────────────────────
   3: {
     conversations: [
-      { contactId: 4, contactName: 'Olivia Bennett', lastMsg: "I don't have clearance.", time: '13:15' },
-      { contactId: 1, contactName: 'James Carter',   lastMsg: 'Done.',                   time: '18:07' },
+      { contactId: 1, contactName: 'James Carter',   lastMsg: 'Course locked. ETA 48 hours.',        time: '06:30' },
+      { contactId: 4, contactName: 'Olivia Bennett', lastMsg: 'Did you leave samples on the Bridge?', time: '14:05' },
     ],
     chatMessages: {
-      4: [
-        { sender: 'Olivia',  time: '13:10', text: 'Need Storage access.' },
-        { sender: 'Daniel',  time: '13:15', text: "I don't have clearance.", self: true },
-      ],
       1: [
-        { sender: 'James',   time: '18:05', text: 'Navigation complete?' },
-        { sender: 'Daniel',  time: '18:07', text: 'Done.', self: true },
+        { sender: 'James',  time: '06:28', text: 'Maintain current trajectory. The storm is clearing up.' },
+        { sender: 'Daniel', time: '06:30', text: 'Course locked. ETA to destination is 48 hours.', self: true },
+      ],
+      4: [
+        { sender: 'Daniel', time: '14:05', text: 'Did you leave your sample containers in the Bridge?', self: true },
+        { sender: 'Olivia', time: '14:07', text: "No, those aren't mine. I haven't left the lab all day." },
       ],
     },
   },
 
-  // ── Olivia Bennett (4) ────────────────────────────────────────
+  // ── Olivia Bennett (4) ────────────────────────────────────────────────
   4: {
     conversations: [
-      { contactId: 2, contactName: 'Sarah Mitchell', lastMsg: 'Sending now.',         time: '13:02' },
-      { contactId: 3, contactName: 'Daniel Brooks',  lastMsg: 'Captain approved it.', time: '15:32' },
+      { contactId: 3, contactName: 'Daniel Brooks',  lastMsg: "No, those aren't mine.",              time: '14:07' },
+      { contactId: 5, contactName: 'Michael Foster', lastMsg: 'Let me know when ready.',             time: '15:10' },
     ],
     chatMessages: {
-      2: [
-        { sender: 'Sarah',  time: '13:00', text: 'Need more coolant.' },
-        { sender: 'Olivia', time: '13:02', text: 'Sending now.', self: true },
-      ],
       3: [
-        { sender: 'Daniel', time: '15:30', text: 'Storage opened?' },
-        { sender: 'Olivia', time: '15:32', text: 'Captain approved it.', self: true },
+        { sender: 'Daniel', time: '14:05', text: 'Did you leave your sample containers in the Bridge?' },
+        { sender: 'Olivia', time: '14:07', text: "No, those aren't mine. I haven't left the lab all day.", self: true },
+      ],
+      5: [
+        { sender: 'Olivia', time: '15:08', text: 'Need a security escort to Weapons later to check the sensors.', self: true },
+        { sender: 'Michael',time: '15:10', text: "Sure, let me know when you're ready to head over to Weapons." },
       ],
     },
   },
 
-  // ── Michael Foster (5) ── IMPOSTOR ────────────────────────────
+  // ── Michael Foster (5) — IMPOSTOR ─────────────────────────────────────
   5: {
     conversations: [
-      { contactId: 1, contactName: 'James Carter',   lastMsg: 'Clear.',           time: '08:31' },
-      { contactId: 2, contactName: 'Sarah Mitchell', lastMsg: 'Already fixed it.',time: '14:09' },
-      { contactId: 3, contactName: 'Daniel Brooks',  lastMsg: 'I uploaded it.',   time: '16:28' },
+      { contactId: 2, contactName: 'Sarah Mitchell', lastMsg: 'Looks completely normal from here.', time: '23:42' },
+      { contactId: 4, contactName: 'Olivia Bennett', lastMsg: "Sure, let me know when ready.",      time: '15:10' },
     ],
     chatMessages: {
-      1: [
-        { sender: 'James',   time: '08:30', text: 'Security status?' },
-        { sender: 'Michael', time: '08:31', text: 'Clear.', self: true },
-      ],
       2: [
-        // Sarah says she is repairing Reactor — Michael claims to have already done it
-        // but his access log shows DENIED at Reactor at 14:08
-        { sender: 'Sarah',   time: '14:07', text: "I'm repairing Reactor." },
-        { sender: 'Michael', time: '14:09', text: 'Already fixed it.', self: true },
+        { sender: 'Sarah',   time: '23:41', text: 'Can you check the security feed near the reactor? Heard a weird noise.' },
+        // ⚠ Rule 4 BREACH: claims to be "from here" (Security/camera room)
+        //   but Access Log shows Reactor Entry at 23:40 — he is IN the reactor.
+        { sender: 'Michael', time: '23:42', text: 'Checked the reactor feed. Everything looks completely normal from here.', self: true, suspicious: true },
       ],
-      3: [
-        // Daniel says Navigation update done — Michael claims to have uploaded it
-        // but his access log shows DENIED at Navigation at 16:26
-        { sender: 'Daniel',  time: '16:26', text: 'Navigation update done.' },
-        { sender: 'Michael', time: '16:28', text: 'I uploaded it.', self: true },
+      4: [
+        { sender: 'Olivia',  time: '15:08', text: 'Need a security escort to Weapons later to check the sensors.' },
+        { sender: 'Michael', time: '15:10', text: "Sure, let me know when you're ready to head over to Weapons.", self: true },
       ],
     },
   },
@@ -216,52 +249,50 @@ const MESSAGE_HISTORY = {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ACCESS LOGS
+   Fields: { timestamp, action, location, detail, level, suspicious? }
+   level: 'INFO' | 'WARNING'
    ═══════════════════════════════════════════════════════════════════════════ */
 const ACCESS_LOGS = {
+  // ── James Carter ─────────────────────────────────────────────────────
+  // Minor distraction: T-102 (Engine Room) has no matching log entry (lazy paperwork)
   1: [
-    { timestamp: '08:03', action: 'ACCESS', location: 'Bridge',         detail: 'Granted', level: 'INFO' },
-    { timestamp: '09:17', action: 'ACCESS', location: 'Admin',          detail: 'Granted', level: 'INFO' },
-    { timestamp: '11:06', action: 'ACCESS', location: 'Communications', detail: 'Granted', level: 'INFO' },
-    { timestamp: '18:39', action: 'ACCESS', location: 'Bridge',         detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-01 08:30', action: 'ENTRY', location: 'Bridge', detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-02 14:15', action: 'ENTRY', location: 'Admin',  detail: 'Granted', level: 'INFO' },
   ],
+  // ── Sarah Mitchell ───────────────────────────────────────────────────
+  // Minor: entered Electrical at 23:45 (past curfew) — but Electrical is NOT restricted
   2: [
-    { timestamp: '14:02', action: 'ACCESS', location: 'Reactor',     detail: 'Granted', level: 'INFO' },
-    { timestamp: '15:08', action: 'ACCESS', location: 'Engine Room', detail: 'Granted', level: 'INFO' },
-    { timestamp: '16:27', action: 'ACCESS', location: 'Electrical',  detail: 'Granted', level: 'INFO' },
-    { timestamp: '17:19', action: 'ACCESS', location: 'Electrical',  detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-01 09:00', action: 'ENTRY', location: 'Engine Room', detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-02 23:45', action: 'ENTRY', location: 'Electrical',  detail: 'Granted', level: 'INFO' },
   ],
+  // ── Daniel Brooks ────────────────────────────────────────────────────
   3: [
-    { timestamp: '10:08', action: 'ACCESS', location: 'Navigation',     detail: 'Granted', level: 'INFO' },
-    { timestamp: '11:58', action: 'ACCESS', location: 'Bridge',         detail: 'Granted', level: 'INFO' },
-    { timestamp: '16:23', action: 'ACCESS', location: 'Communications', detail: 'Granted', level: 'INFO' },
-    { timestamp: '18:04', action: 'ACCESS', location: 'Navigation',     detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-01 08:15', action: 'ENTRY', location: 'Bridge', detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-02 11:00', action: 'ENTRY', location: 'Bridge', detail: 'Granted', level: 'INFO' },
   ],
+  // ── Olivia Bennett ───────────────────────────────────────────────────
   4: [
-    { timestamp: '09:12', action: 'ACCESS', location: 'Laboratory', detail: 'Granted', level: 'INFO' },
-    { timestamp: '10:58', action: 'ACCESS', location: 'MedBay',     detail: 'Granted', level: 'INFO' },
-    { timestamp: '15:28', action: 'ACCESS', location: 'Storage',    detail: 'Granted', level: 'INFO' },
-    { timestamp: '18:09', action: 'ACCESS', location: 'Laboratory', detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-01 10:00', action: 'ENTRY', location: 'MedBay', detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-02 13:20', action: 'ENTRY', location: 'MedBay', detail: 'Granted', level: 'INFO' },
   ],
+  // ── Michael Foster — IMPOSTOR ─────────────────────────────────────────
+  // ⚠ Breach 1 (Rules 1 & 2): Reactor at 23:40 — past curfew + zero reactor tasks
   5: [
-    { timestamp: '08:29', action: 'ACCESS', location: 'Security',   detail: 'Granted', level: 'INFO' },
-    // Claims to have done Reactor Override (S-502) at 14:08 — but was DENIED
-    { timestamp: '14:08', action: 'ACCESS', location: 'Reactor',    detail: 'Denied',  level: 'WARNING', suspicious: true },
-    // Claims to have done Navigation Update (S-503) at 16:26 — but was DENIED
-    { timestamp: '16:26', action: 'ACCESS', location: 'Navigation', detail: 'Denied',  level: 'WARNING', suspicious: true },
-    { timestamp: '18:34', action: 'ACCESS', location: 'Security',   detail: 'Granted', level: 'INFO' },
+    { timestamp: '2026-06-01 11:15', action: 'ENTRY', location: 'Security', detail: 'Granted', level: 'INFO' },
+    // CRITICAL: Reactor entry past 23:00 with NO task assignment for Reactor
+    { timestamp: '2026-06-02 23:40', action: 'ENTRY', location: 'Reactor',  detail: 'Granted', level: 'WARNING', suspicious: true },
   ],
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SHIP REGULATIONS  (separate tab — the rulebook players use to solve puzzle)
+   SHIP REGULATIONS — SKELD-9 CREW OPERATIONS MANUAL
+   Displayed in the Ship Regulations tab (rulebook players use to solve puzzle)
    ═══════════════════════════════════════════════════════════════════════════ */
 export const SHIP_REGULATIONS = [
-  'Only the Chief Engineer may perform Reactor Calibration, Reactor Override, or Engine Diagnostics.',
-  'Only the Navigation Officer may update Flight Routes or Navigation Data.',
-  'Security Officers cannot enter Navigation or Reactor Control without emergency authorization.',
-  'Any Denied access log means the associated task could not have been completed.',
-  'Tasks marked Completed must have a corresponding Granted entry in the Access Log.',
-  'Crew messages are timestamped and considered authentic.',
+  'Rule 1 — Curfew & Restricted Sectors: Entering highly volatile zones like the Engine Room or the Reactor past 23:00 hours is prohibited without an active maintenance task or an accompanying security escort.',
+  'Rule 2 — Task-Log Alignment: If a crewmate\'s Access Log shows they physically entered a room, they must have a corresponding assignment in Task History for that area, or explicit text proof in Message History explaining why they were dispatched there.',
+  'Rule 3 — Database ID Checksum Verification: To prevent system spoofing, the numerical digits in all Employee IDs must add up to an even sum total between 10 and 12. Any sum outside this bracket indicates a modified profile.',
+  'Rule 4 — Digital Alibi Rule: Statements regarding current locations or ongoing tasks made within Message History must align with the physical coordinates in the Access Log.',
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════

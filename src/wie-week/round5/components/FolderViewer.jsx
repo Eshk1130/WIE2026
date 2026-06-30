@@ -9,7 +9,7 @@ import AmongUsIcon from './AmongUsIcon';
 import '../styles/FolderViewer.css';
 import '../styles/Viewers.css';
 
-const REACTOR_CODE = '6430';
+const REACTOR_CODE = '5503';
 const COUNTDOWN_SECONDS = 3 * 60;
 
 const VIEWER_LABELS = {
@@ -21,17 +21,17 @@ const VIEWER_LABELS = {
 };
 
 const HINTS = [
-  { label: '_ _ _ 1', text: 'Compare the task history against the access log for contradictions.' },
-  { label: '_ _ _ 2', text: 'Check whether the messages line up with the claimed task completion times.' },
-  { label: '_ _ _ 3', text: 'Match the suspect\'s role against the ship regulations.' },
-  { label: '_ _ _ 4', text: 'Any denied access means the corresponding task could not have been completed.' },
+  { label: 'RULE 1', text: 'Entering the Engine Room or Reactor past 23:00 without a task or escort is prohibited.' },
+  { label: 'RULE 2', text: 'If the Access Log shows a room entry, a matching Task History assignment must exist — or a Message explaining the visit.' },
+  { label: 'RULE 3', text: 'The numerical digits in every Employee ID must sum to an even total between 10 and 12. Outside that bracket = tampered profile.' },
+  { label: 'RULE 4', text: 'Location claims made in Message History must match the physical coordinates shown in the Access Log.' },
 ];
 
 const EVIDENCE_HINTS = [
-  { icon: '📋', file: 'TASK HISTORY', tip: 'Cross-check completed tasks with who was actually authorized.' },
-  { icon: '👤', file: 'CREW PROFILE', tip: 'Role and clearance are not enough on their own.' },
-  { icon: '💬', file: 'MESSAGE HISTORY', tip: 'Timestamps can reveal who was lying.' },
-  { icon: '🔐', file: 'ACCESS LOG', tip: 'Denied entries are the strongest evidence.' },
+  { icon: '📋', file: 'TASK HISTORY',     tip: 'Check every crewmate\'s tasks against where they were physically logged.' },
+  { icon: '👤', file: 'CREW PROFILE',     tip: 'Add up the digits in the Employee ID — the sum must be 10, 11, or 12.' },
+  { icon: '💬', file: 'MESSAGE HISTORY',  tip: 'Does what they said match where the Access Log puts them?' },
+  { icon: '🔐', file: 'ACCESS LOG',       tip: 'Look for Reactor or Engine Room entries past 23:00 with no matching task.' },
 ];
 
 function getViewerData(crewmateId, folderKey) {
@@ -253,7 +253,7 @@ function ShipSavedScreen({ onContinue }) {
       <div style={{ fontSize: '3rem' }}>🛸</div>
       <div style={{ fontSize: 'clamp(0.5rem, 1.5vw, 0.8rem)', letterSpacing: '0.4em', color: '#00ff88', opacity: 0.7 }}>REACTOR STABILISED</div>
       <div style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', color: '#00ff88', textShadow: '0 0 30px rgba(0,255,136,0.7)', textAlign: 'center', lineHeight: 1.5 }}>SHIP<br />SAVED</div>
-      <div style={{ fontSize: '0.55rem', color: '#00bb66', letterSpacing: '0.15em', textAlign: 'center', lineHeight: 2, maxWidth: '400px' }}>OVERRIDE ACCEPTED.<br />VIKTOR KOZLOV HAS BEEN EJECTED.<br />THE CREW SURVIVES.</div>
+      <div style={{ fontSize: '0.55rem', color: '#00bb66', letterSpacing: '0.15em', textAlign: 'center', lineHeight: 2, maxWidth: '400px' }}>OVERRIDE ACCEPTED.<br />MICHAEL FOSTER HAS BEEN EJECTED.<br />THE CREW SURVIVES.</div>
       <button onClick={onContinue} style={{ marginTop: '16px', fontFamily: "'Press Start 2P', monospace", fontSize: '0.5rem', padding: '12px 28px', background: '#00ff88', border: 'none', borderRadius: '8px', color: '#001a0a', cursor: 'pointer', letterSpacing: '0.1em', boxShadow: '0 0 24px rgba(0,255,136,0.5)', transition: 'transform 0.15s' }}
         onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
         onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>

@@ -13,7 +13,8 @@
  * Mock mode and the DEV SKIP button have been removed entirely.
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import LandingPage from './wie-week/Landing/LandingPage';
 import HackAmongUs from './wie-week/Transition_pages/HackAmongUs';
@@ -112,21 +113,7 @@ function GameApp() {
       {/* ── Finish ── */}
       {stage === 'finish' && <Finish onRestart={() => setStage('landing')} />}
 
-      {/* ── DEV: skip button (mock mode only) ── */}
-      {MOCK_MODE && (
-        <button
-          onClick={advance}
-          style={{
-            position: 'fixed', bottom: 16, right: 16, zIndex: 99999,
-            fontFamily: 'monospace', fontSize: '0.65rem',
-            background: 'rgba(255,200,0,0.15)', color: '#ffc800',
-            border: '1px solid rgba(255,200,0,0.5)', borderRadius: 6,
-            padding: '6px 14px', cursor: 'pointer', letterSpacing: '0.1em',
-          }}
-        >
-          DEV SKIP › {stage}
-        </button>
-      )}
+
     </>
   );
 }
@@ -137,28 +124,11 @@ export default function App() {
     <PlayerProvider>
       <BrowserRouter>
         <Routes>
-          {/* ── Public routes ── */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-
           {/* ── Admin dashboard (password-gated internally) ── */}
           <Route path="/admin" element={<AdminPanel />} />
 
-          {/* ── Protected game route ── */}
-          <Route
-            path="/game"
-            element={
-              <RequireAuth>
-                <GameFlow />
-              </RequireAuth>
-            }
-          />
-
-          {/* ── Root: redirect to game (RequireAuth will push to /login if needed) ── */}
-          <Route path="/" element={<Navigate to="/game" replace />} />
-
-          {/* ── Catch-all ── */}
-          <Route path="*" element={<Navigate to="/game" replace />} />
+          {/* ── Main game (catches all other paths) ── */}
+          <Route path="*" element={<GameApp />} />
         </Routes>
       </BrowserRouter>
     </PlayerProvider>
