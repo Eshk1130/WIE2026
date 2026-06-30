@@ -50,11 +50,14 @@ export default function usePlayer() {
   }, []);
 
   // ── join ──────────────────────────────────────────────────────────────────
-  const join = useCallback(async (displayName, email) => {
+  // Accepts either:
+  //   join(authUser)              — new Google OAuth flow (authUser.id is present)
+  //   join(displayName, email)    — legacy manual flow (not used in new GameFlow)
+  const join = useCallback(async (authUserOrName, email) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await joinGame(displayName, email);
+      const result = await joinGame(authUserOrName);
       setPlayer(result.player);
       setSessionId(result.sessionId);
       return result;

@@ -1,7 +1,21 @@
 /**
  * src/lib/gameService.js
  * ─────────────────────────────────────────────────────────────────────────────
- * All Supabase DB interaction functions for WIE2026 – Crewmate Protocol
+ * All Supabase DB interaction functions for WIE2026 – The Cypher Trail.
+ *
+ * NOTE on admin_player_summary "empty Players" bug:
+ *   Most common causes (check in order):
+ *   1. The VIEW does not have SELECT granted to the `anon` role.
+ *      Fix: GRANT SELECT ON admin_player_summary TO anon, authenticated;
+ *   2. RLS on the underlying `players` table blocks the view.
+ *      Supabase pre-v15 views do NOT use security_invoker; they run as
+ *      the view definer (postgres). If RLS forces row-filtering, the view
+ *      returns 0 rows. Fix: set the view's security_definer, or disable RLS
+ *      on players and use auth.uid()-scoped policies instead.
+ *   3. Column names mismatch — this file uses `player_id`, `display_name`,
+ *      `total_score`, `last_seen`, `total_sessions`, `avg_score`,
+ *      `total_time_secs`, `total_games`. Verify against your real view schema.
+ *   All of the above are addressed in supabase/migration_v2.sql.
  */
 
 import { supabase } from './supabase.js';
@@ -11,40 +25,37 @@ const PLAYER_KEY  = 'wie2026_player';
 const SESSION_KEY = 'wie2026_session';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// joinGame
-// Upserts a player record (conflict on email) then creates a new session row.
-// Persists both to localStorage and returns { player, sessionId }.
+// joinGame (Auth-based)
+// After Google OAuth, the player row already exists (upserted by upsertPlayerFromAuth).
+// This function creates a new session row and persists the IDs to localStorage.
+//
+// Pass the Supabase auth user object. The player row is looked up by auth_id.
 // ─────────────────────────────────────────────────────────────────────────────
-export async function joinGame(displayName, email) {
+export async function joinGame(authUser) {
+  if (!authUser?.id) throw new Error('joinGame: no authenticated user provided.');
+
   try {
-    // 1. Upsert player --------------------------------------------------------
-    const { data: playerRows, error: playerErr } = await supabase
+    // 1. Fetch the player row that was created during OAuth callback ----------
+    const { data: player, error: playerErr } = await supabase
       .from('players')
-      .upsert(
-        { display_name: displayName, email: email || null },
-        { onConflict: 'email', ignoreDuplicates: false }
-      )
-      .select();
+      .select('*')
+      .eq('auth_id', authUser.id)
+      .single();
 
     if (playerErr) throw playerErr;
-    if (!playerRows || playerRows.length === 0) {
-      throw new Error('joinGame: no player row returned after upsert.');
-    }
-
-    const player = playerRows[0];
+    if (!player) throw new Error('joinGame: player record not found for this auth user. Was upsertPlayerFromAuth called?');
 
     // 2. Insert session -------------------------------------------------------
-    const { data: sessionRows, error: sessionErr } = await supabase
+    const { data: sessionRow, error: sessionErr } = await supabase
       .from('sessions')
       .insert({ player_id: player.id, logged_in_at: new Date().toISOString() })
-      .select();
+      .select()
+      .single();
 
     if (sessionErr) throw sessionErr;
-    if (!sessionRows || sessionRows.length === 0) {
-      throw new Error('joinGame: no session row returned after insert.');
-    }
+    if (!sessionRow) throw new Error('joinGame: no session row returned after insert.');
 
-    const sessionId = sessionRows[0].id;
+    const sessionId = sessionRow.id;
 
     // 3. Persist to localStorage ----------------------------------------------
     localStorage.setItem(PLAYER_KEY,  JSON.stringify(player));
@@ -59,14 +70,12 @@ export async function joinGame(displayName, email) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // leaveGame
-// Stamps logged_out_at on the active session and calculates duration_secs.
-// Clears localStorage.
+// Stamps logged_out_at + computes duration_secs. Clears localStorage.
 // ─────────────────────────────────────────────────────────────────────────────
 export async function leaveGame(sessionId) {
   if (!sessionId) return;
 
   try {
-    // Fetch logged_in_at so we can compute duration
     const { data: sessionRow, error: fetchErr } = await supabase
       .from('sessions')
       .select('logged_in_at')
@@ -75,21 +84,18 @@ export async function leaveGame(sessionId) {
 
     if (fetchErr) throw fetchErr;
 
-    const loggedInAt  = sessionRow?.logged_in_at ? new Date(sessionRow.logged_in_at) : new Date();
-    const loggedOutAt = new Date();
+    const loggedInAt   = sessionRow?.logged_in_at ? new Date(sessionRow.logged_in_at) : new Date();
+    const loggedOutAt  = new Date();
     const durationSecs = Math.round((loggedOutAt - loggedInAt) / 1000);
 
     const { error: updateErr } = await supabase
       .from('sessions')
-      .update({
-        logged_out_at: loggedOutAt.toISOString(),
-        duration_secs: durationSecs,
-      })
+      .update({ logged_out_at: loggedOutAt.toISOString(), duration_secs: durationSecs })
       .eq('id', sessionId);
 
     if (updateErr) throw updateErr;
   } catch (err) {
-    // Best-effort — don't block teardown on error
+    // Best-effort on tab close — don't block teardown
     console.error('[gameService] leaveGame failed:', err);
   } finally {
     localStorage.removeItem(PLAYER_KEY);
@@ -100,11 +106,10 @@ export async function leaveGame(sessionId) {
 // ─────────────────────────────────────────────────────────────────────────────
 // getStoredPlayer
 // Restores player + sessionId from localStorage.
-// Returns { player, sessionId } or { player: null, sessionId: null }.
 // ─────────────────────────────────────────────────────────────────────────────
 export function getStoredPlayer() {
   try {
-    const raw = localStorage.getItem(PLAYER_KEY);
+    const raw       = localStorage.getItem(PLAYER_KEY);
     const player    = raw ? JSON.parse(raw) : null;
     const sessionId = localStorage.getItem(SESSION_KEY) || null;
     return { player, sessionId };
@@ -114,33 +119,51 @@ export function getStoredPlayer() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// recordScore
-// Inserts a score row for the given player + session.
+// recordScore  (legacy — kept for compatibility)
 // ─────────────────────────────────────────────────────────────────────────────
 export async function recordScore(playerId, sessionId, { score, role, survived, tasks_done }) {
+  return submitRoundScore(playerId, sessionId, { score, role, survived, tasks_done });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// submitRoundScore
+// Inserts a score row for a specific game round.
+// New fields (added via migration_v2.sql): round, time_taken_secs, evidence_text
+// ─────────────────────────────────────────────────────────────────────────────
+export async function submitRoundScore(playerId, sessionId, {
+  score,
+  round = null,
+  role = null,
+  survived = null,
+  tasks_done = 0,
+  time_taken_secs = null,
+  evidence_text = null,
+}) {
   try {
     const { error } = await supabase
       .from('scores')
       .insert({
-        player_id:  playerId,
-        session_id: sessionId,
+        player_id:      playerId,
+        session_id:     sessionId,
         score,
+        round,
         role,
-        survived: !!survived,
-        tasks_done: tasks_done ?? 0,
-        recorded_at: new Date().toISOString(),
+        survived:       survived != null ? !!survived : null,
+        tasks_done:     tasks_done ?? 0,
+        time_taken_secs,
+        evidence_text,
+        recorded_at:    new Date().toISOString(),
       });
 
     if (error) throw error;
   } catch (err) {
-    console.error('[gameService] recordScore failed:', err);
+    console.error('[gameService] submitRoundScore failed:', err);
     throw err;
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // fetchLeaderboard
-// Returns top N players from admin_player_summary ordered by total_score DESC.
 // ─────────────────────────────────────────────────────────────────────────────
 export async function fetchLeaderboard(limit = 20) {
   try {
@@ -150,7 +173,10 @@ export async function fetchLeaderboard(limit = 20) {
       .order('total_score', { ascending: false })
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error('[gameService] fetchLeaderboard error:', error);
+      throw error;
+    }
     return data ?? [];
   } catch (err) {
     console.error('[gameService] fetchLeaderboard failed:', err);
@@ -160,7 +186,9 @@ export async function fetchLeaderboard(limit = 20) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // fetchAdminSummary
-// Returns all rows from admin_player_summary ordered by last_seen DESC.
+// BUG NOTE: If this returns empty even though players exist, the most likely
+// cause is missing GRANT SELECT on admin_player_summary to anon/authenticated,
+// OR RLS on the underlying players table. See migration_v2.sql.
 // ─────────────────────────────────────────────────────────────────────────────
 export async function fetchAdminSummary() {
   try {
@@ -169,7 +197,15 @@ export async function fetchAdminSummary() {
       .select('*')
       .order('last_seen', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[gameService] fetchAdminSummary error (code:', error.code, '):', error.message);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('[gameService] fetchAdminSummary returned 0 rows. Check: (1) VIEW grants, (2) RLS on players table, (3) view column names match query. See migration_v2.sql.');
+    }
+
     return data ?? [];
   } catch (err) {
     console.error('[gameService] fetchAdminSummary failed:', err);
@@ -179,22 +215,18 @@ export async function fetchAdminSummary() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // fetchAllSessions
-// Returns sessions joined with player display_name + email, newest first.
 // ─────────────────────────────────────────────────────────────────────────────
 export async function fetchAllSessions() {
   try {
     const { data, error } = await supabase
       .from('sessions')
-      .select(`
-        id,
-        logged_in_at,
-        logged_out_at,
-        duration_secs,
-        players ( display_name, email )
-      `)
+      .select('id, logged_in_at, logged_out_at, duration_secs, players ( display_name, email )')
       .order('logged_in_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[gameService] fetchAllSessions error:', error);
+      throw error;
+    }
     return data ?? [];
   } catch (err) {
     console.error('[gameService] fetchAllSessions failed:', err);
@@ -204,24 +236,18 @@ export async function fetchAllSessions() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // fetchAllScores
-// Returns scores joined with player display_name + email, newest first.
 // ─────────────────────────────────────────────────────────────────────────────
 export async function fetchAllScores() {
   try {
     const { data, error } = await supabase
       .from('scores')
-      .select(`
-        id,
-        score,
-        role,
-        survived,
-        tasks_done,
-        recorded_at,
-        players ( display_name, email )
-      `)
+      .select('id, score, round, role, survived, tasks_done, time_taken_secs, evidence_text, recorded_at, players ( display_name, email )')
       .order('recorded_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[gameService] fetchAllScores error:', error);
+      throw error;
+    }
     return data ?? [];
   } catch (err) {
     console.error('[gameService] fetchAllScores failed:', err);
@@ -230,8 +256,33 @@ export async function fetchAllScores() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// fetchScoreboardData
+// Returns all score rows joined with player names, for the admin scoreboard.
+// Aggregation (per-round breakdown, totals) is done client-side.
+// ─────────────────────────────────────────────────────────────────────────────
+export async function fetchScoreboardData() {
+  try {
+    const { data, error } = await supabase
+      .from('scores')
+      .select(`
+        id, player_id, score, round, time_taken_secs, recorded_at,
+        players ( id, display_name, email )
+      `)
+      .order('recorded_at', { ascending: true });
+
+    if (error) {
+      console.error('[gameService] fetchScoreboardData error:', error);
+      throw error;
+    }
+    return data ?? [];
+  } catch (err) {
+    console.error('[gameService] fetchScoreboardData failed:', err);
+    throw err;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // fetchAuditLog
-// Returns the most recent N rows from audit_log (read-only from frontend).
 // ─────────────────────────────────────────────────────────────────────────────
 export async function fetchAuditLog(limit = 500) {
   try {
@@ -241,7 +292,10 @@ export async function fetchAuditLog(limit = 500) {
       .order('occurred_at', { ascending: false })
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error('[gameService] fetchAuditLog error:', error);
+      throw error;
+    }
     return data ?? [];
   } catch (err) {
     console.error('[gameService] fetchAuditLog failed:', err);
