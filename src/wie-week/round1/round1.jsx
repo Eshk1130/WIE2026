@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { getRound1Questions } from '../api';
+import MCQ_QUESTIONS from '../../data/mcqQuestions.js';  // CHANGED: real question bank
 import './round1.css';
 import adminRoom from './assets/admin_roombg.png';
 import crewBlue from './assets/crewmate_blue.png';
 import crewGreen from './assets/crewmate_green.png';
 import crewRed from './assets/crewmate_red.png';
 import crewYellow from './assets/crewmate_yellow.png';
+
+// ADDED: scoring + player context
+import { usePlayerContext } from '../../lib/PlayerContext.jsx';
+import { submitRoundScore } from '../../lib/gameService.js';
+import { scoreRound1, ROUND_NAMES, startRoundTimer, startQuestionTimer } from '../../lib/scoringEngine.js';
 
 const CREW = [crewBlue, crewGreen, crewRed, crewYellow];
 
@@ -90,41 +95,130 @@ function NavigatingOverlay({ onDone, label = 'TASK COMPLETE' }) {
 }
 
 export default function Round1({ onComplete }) {
-  const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // CHANGED: use real MCQ_QUESTIONS instead of async api.js call
+  const questions = MCQ_QUESTIONS;
   const [cur, setCur] = useState(0);
   const [sel, setSel] = useState(null);
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState({});  // { idx: selectedOptionIndex }
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    getRound1Questions().then(data => {
-      setQuestions(data);
-      setLoading(false);
-    });
-  }, []);
+  // ADDED: scoring + timing state
+  const { player, sessionId } = usePlayerContext();
 
-  if (loading) return (
-    <div className="r1-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ fontFamily: 'Orbitron, monospace', color: '#3a8fc7', letterSpacing: '0.2em', fontSize: '0.9rem' }}>LOADING MISSION DATA...</span>
-    </div>
-  );
+  // Round timer — starts when component mounts
+  const stopRoundTimer = useRef(startRoundTimer());
 
-  const q = questions[cur];
+  // Per-question timer — starts when question changes
+  const stopQuestionTimerRef = useRef(startQuestionTimer());
+
+  // Per-question timing log: { [qIdx]: { timeSpentSecs, attemptsUsed } }
+  const questionTimingRef = useRef({});
+
+  // Track which questions had their first wrong attempt (for retry logic)
+  const firstAttemptWrongRef = useRef({});
+
   const total = questions.length;
   const done = Object.keys(answers).length;
   const allAnswered = done >= total && total > 0;
 
+  // ADDED: restart question timer when current question changes
+  useEffect(() => {
+    stopQuestionTimerRef.current = startQuestionTimer();
+  }, [cur]);
+
+  const q = questions[cur];
+
   function pick(i) { setSel(i); }
+
   function next() {
     if (sel === null) return;
+
+    // Record time spent on this question before moving
+    const timeSpentSecs = stopQuestionTimerRef.current();
+
+    // Determine if this is a first or retry attempt
+    const prevAnswer = answers[cur];
+    const isRetry = prevAnswer !== undefined && prevAnswer !== sel;
+    const attemptsUsed = isRetry ? 2 : (firstAttemptWrongRef.current[cur] ? 2 : 1);
+
+    // If first attempt was wrong, mark for retry tracking
+    if (!isRetry && prevAnswer === undefined) {
+      // First time answering this question
+    } else if (firstAttemptWrongRef.current[cur] === undefined && prevAnswer !== undefined) {
+      // They're changing answer — counts as retry
+      firstAttemptWrongRef.current[cur] = true;
+    }
+
+    // Log timing
+    questionTimingRef.current[cur] = { timeSpentSecs, attemptsUsed };
+
     const updated = { ...answers, [cur]: sel };
     setAnswers(updated);
     if (cur < total - 1) { setCur(c => c + 1); setSel(updated[cur + 1] ?? null); }
   }
+
   function back() {
     if (cur === 0) return;
+    // Save time on current question before navigating back
+    const timeSpentSecs = stopQuestionTimerRef.current();
+    questionTimingRef.current[cur] = {
+      timeSpentSecs,
+      attemptsUsed: questionTimingRef.current[cur]?.attemptsUsed ?? 1,
+    };
     setAnswers(p => ({ ...p, [cur]: sel }));
     setCur(c => c - 1); setSel(answers[cur - 1] ?? null);
+  }
+
+  // ADDED: final submission with scoring
+  async function handleFinalSubmit() {
+    if (!allAnswered || submitting || submitted) return;
+    setSubmitting(true);
+
+    // Record time for last question
+    const lastTimeSecs = stopQuestionTimerRef.current();
+    questionTimingRef.current[cur] = {
+      timeSpentSecs: lastTimeSecs,
+      attemptsUsed: questionTimingRef.current[cur]?.attemptsUsed ?? 1,
+    };
+
+    // Build per-question detail array
+    const questionDetail = questions.map((qItem, idx) => {
+      const selectedOpt = answers[idx] ?? null;
+      const isCorrect = selectedOpt === qItem.ans;
+      const timing = questionTimingRef.current[idx] ?? { timeSpentSecs: 0, attemptsUsed: 1 };
+      return {
+        questionId: qItem.id,
+        isCorrect,
+        attemptsUsed: timing.attemptsUsed,
+        timeSpentSecs: timing.timeSpentSecs,
+      };
+    });
+
+    const totalScore = scoreRound1(questionDetail);
+    const correctCount = questionDetail.filter(d => d.isCorrect).length;
+    const wrongCount = questionDetail.filter(d => !d.isCorrect).length;
+    const roundTimeSecs = stopRoundTimer.current();
+
+    // Submit to Supabase if player is logged in
+    if (player?.id && sessionId) {
+      try {
+        await submitRoundScore(player.id, sessionId, {
+          score: totalScore,
+          round: ROUND_NAMES.ROUND1,
+          time_taken_secs: roundTimeSecs,
+          question_detail: questionDetail,
+          correct_count: correctCount,
+          wrong_count: wrongCount,
+        });
+      } catch (err) {
+        console.error('[Round1] submitRoundScore failed:', err);
+        // Non-fatal — continue to next round
+      }
+    }
+
+    setSubmitted(true);
+    setSubmitting(false);
   }
 
   return (
@@ -276,8 +370,13 @@ export default function Round1({ onComplete }) {
                   </button>
                 ))}
               </div>
-              <button className={`r1-next${sel !== null ? ' r1-next--on' : ''}`} onClick={next} disabled={sel === null}>
-                {cur === total - 1 ? 'SUBMIT' : 'NEXT →'}
+              {/* CHANGED: last question shows SUBMIT, triggers scoring */}
+              <button
+                className={`r1-next${sel !== null ? ' r1-next--on' : ''}`}
+                onClick={cur === total - 1 && allAnswered ? handleFinalSubmit : next}
+                disabled={sel === null || submitting}
+              >
+                {submitting ? 'SAVING...' : cur === total - 1 ? 'SUBMIT' : 'NEXT →'}
               </button>
             </div>
           </div>
@@ -367,7 +466,8 @@ export default function Round1({ onComplete }) {
         </div>
       </div>
 
-      {allAnswered && onComplete && <NavigatingOverlay onDone={onComplete} label="ROUND 1 COMPLETE" />}
+      {/* CHANGED: trigger overlay only after score has been submitted */}
+      {submitted && onComplete && <NavigatingOverlay onDone={onComplete} label="ROUND 1 COMPLETE" />}
     </>
   );
 }

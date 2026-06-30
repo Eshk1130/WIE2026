@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { getRound2Modules } from '../api';
+import CODING_QUESTIONS from '../../data/codingQuestions.js'; // CHANGED: real data
 import './round2.css';
 import electricalBg from './assets/electricalBg.png';
 import crewBlue from '../round1/assets/crewmate_blue.png';
 import crewRed from '../round1/assets/crewmate_red.png';
+
+// ADDED: scoring + player context
+import { usePlayerContext } from '../../lib/PlayerContext.jsx';
+import { submitRoundScore } from '../../lib/gameService.js';
+import { scorePassFail, ROUND_NAMES, startRoundTimer } from '../../lib/scoringEngine.js';
 
 const GOLD_STARS = (count) => Array.from({ length: count }, (_, i) => ({
   id: i,
@@ -82,23 +87,20 @@ function CodeLine({ line, num }) {
 }
 
 export default function Round2({ onComplete }) {
-  const [modules, setModules] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // ADDED: player context + round timer
+  const { player, sessionId } = usePlayerContext();
+  const stopRoundTimerRef = useRef(startRoundTimer());
+
+  // CHANGED: use real CODING_QUESTIONS directly (no async load needed)
+  const [modules] = useState(() => CODING_QUESTIONS);
+  const [loading] = useState(false);
   const [selectedModule, setSelectedModule] = useState(null);
-  const [activeModule, setActiveModule] = useState(null);
+  const [activeModule, setActiveModule] = useState(CODING_QUESTIONS[0]?.id ?? null);
   const [activeQ, setActiveQ] = useState(0);
   const [answers, setAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
   const [input, setInput] = useState('');
   const [showCode, setShowCode] = useState(false);
-
-  useEffect(() => {
-    getRound2Modules().then(data => {
-      setModules(data);
-      setActiveModule(data[0]?.id ?? null);
-      setLoading(false);
-    });
-  }, []);
 
   if (loading) return (
     <div className="r2-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -465,7 +467,24 @@ export default function Round2({ onComplete }) {
           mod={mod}
           answers={answers}
           activeModule={activeModule}
-          onContinue={onComplete}
+          onContinue={async (isCorrect) => {
+            // ADDED: submit score before advancing
+            const timeSecs = stopRoundTimerRef.current();
+            const pts = scorePassFail(isCorrect);
+            if (player?.id && sessionId) {
+              try {
+                await submitRoundScore(player.id, sessionId, {
+                  score: pts,
+                  round: ROUND_NAMES.ROUND2,
+                  time_taken_secs: timeSecs,
+                  question_detail: [{ isCorrect, codeCorrect: isCorrect }],
+                });
+              } catch (err) {
+                console.error('[Round2] submitRoundScore failed:', err);
+              }
+            }
+            onComplete?.();
+          }}
         />
       )}
     </>
@@ -510,6 +529,9 @@ function CodePopup({ mod, answers, activeModule, onContinue }) {
       }, 1200);
     }
   };
+
+  // CHANGED: pass isCorrect to parent so it can score
+  const handleContinue = () => onContinue(status === 'ok');
 
   return (
     <div style={{
@@ -602,7 +624,7 @@ function CodePopup({ mod, answers, activeModule, onContinue }) {
           </button>
         ) : (
           <button
-            onClick={onContinue}
+            onClick={handleContinue}
             style={{
               fontFamily: "'Press Start 2P',monospace", fontSize: '0.55rem',
               padding: '12px 32px',

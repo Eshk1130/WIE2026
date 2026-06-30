@@ -16,6 +16,10 @@
  *      `total_score`, `last_seen`, `total_sessions`, `avg_score`,
  *      `total_time_secs`, `total_games`. Verify against your real view schema.
  *   All of the above are addressed in supabase/migration_v2.sql.
+ *
+ * BUG FIX (duplicate sessions):
+ *   joinGame() now checks for an open session (logged_out_at IS NULL)
+ *   before inserting a new row. If one is found, it is reused.
  */
 
 import { supabase } from './supabase.js';
@@ -56,7 +60,12 @@ export async function upsertPlayerFromAuth(authUser) {
 // ─────────────────────────────────────────────────────────────────────────────
 // joinGame (Auth-based)
 // After Google OAuth, the player row already exists (upserted by upsertPlayerFromAuth).
-// This function creates a new session row and persists the IDs to localStorage.
+// This function creates a new session row (or reuses an open one) and persists
+// the IDs to localStorage.
+//
+// BUG FIX: before inserting, check if the player already has an open session
+// (logged_out_at IS NULL). If yes, reuse it. This prevents duplicate rows when
+// the auth listener fires multiple times (React StrictMode, duplicate events).
 //
 // Pass the Supabase auth user object. The player row is looked up by auth_id.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -74,7 +83,24 @@ export async function joinGame(authUser) {
     if (playerErr) throw playerErr;
     if (!player) throw new Error('joinGame: player record not found for this auth user. Was upsertPlayerFromAuth called?');
 
-    // 2. Insert session -------------------------------------------------------
+    // 2. FIX: check for an existing open session to avoid duplicate rows ------
+    const { data: openSession } = await supabase
+      .from('sessions')
+      .select('id')
+      .eq('player_id', player.id)
+      .is('logged_out_at', null)
+      .maybeSingle(); // returns null (not an error) when no row found
+
+    if (openSession) {
+      // Reuse the existing open session — do NOT insert a new one
+      console.log('[gameService] joinGame: reusing open session', openSession.id);
+      const sessionId = openSession.id;
+      localStorage.setItem(PLAYER_KEY, JSON.stringify(player));
+      localStorage.setItem(SESSION_KEY, sessionId);
+      return { player, sessionId };
+    }
+
+    // 3. No open session found — insert a fresh one --------------------------
     const { data: sessionRow, error: sessionErr } = await supabase
       .from('sessions')
       .insert({ player_id: player.id, logged_in_at: new Date().toISOString() })
@@ -86,7 +112,7 @@ export async function joinGame(authUser) {
 
     const sessionId = sessionRow.id;
 
-    // 3. Persist to localStorage ----------------------------------------------
+    // 4. Persist to localStorage ----------------------------------------------
     localStorage.setItem(PLAYER_KEY, JSON.stringify(player));
     localStorage.setItem(SESSION_KEY, sessionId);
 
@@ -158,6 +184,8 @@ export async function recordScore(playerId, sessionId, { score, role, survived, 
 // submitRoundScore
 // Inserts a score row for a specific game round.
 // New fields (added via migration_v2.sql): round, time_taken_secs, evidence_text
+// New fields (added via migration_v3.sql): question_detail (JSONB),
+//   correct_count, wrong_count
 // ─────────────────────────────────────────────────────────────────────────────
 export async function submitRoundScore(playerId, sessionId, {
   score,
@@ -167,6 +195,9 @@ export async function submitRoundScore(playerId, sessionId, {
   tasks_done = 0,
   time_taken_secs = null,
   evidence_text = null,
+  question_detail = null,   // NEW: JSONB array of per-question detail
+  correct_count = null,     // NEW: number of correct answers (round 1)
+  wrong_count = null,       // NEW: number of wrong answers (round 1)
 }) {
   try {
     const { error } = await supabase
@@ -181,6 +212,9 @@ export async function submitRoundScore(playerId, sessionId, {
         tasks_done: tasks_done ?? 0,
         time_taken_secs,
         evidence_text,
+        question_detail,
+        correct_count,
+        wrong_count,
         recorded_at: new Date().toISOString(),
       });
 
@@ -265,12 +299,16 @@ export async function fetchAllSessions() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // fetchAllScores
+// Now also fetches question_detail, correct_count, wrong_count (migration v3)
 // ─────────────────────────────────────────────────────────────────────────────
 export async function fetchAllScores() {
   try {
     const { data, error } = await supabase
       .from('scores')
-      .select('id, score, round, role, survived, tasks_done, time_taken_secs, evidence_text, recorded_at, players ( display_name, email )')
+      .select(
+        'id, score, round, role, survived, tasks_done, time_taken_secs, evidence_text, ' +
+        'question_detail, correct_count, wrong_count, recorded_at, players ( display_name, email )'
+      )
       .order('recorded_at', { ascending: false });
 
     if (error) {
@@ -294,7 +332,7 @@ export async function fetchScoreboardData() {
     const { data, error } = await supabase
       .from('scores')
       .select(`
-        id, player_id, score, round, time_taken_secs, recorded_at,
+        id, player_id, score, round, time_taken_secs, correct_count, wrong_count, recorded_at,
         players ( id, display_name, email )
       `)
       .order('recorded_at', { ascending: true });

@@ -1,12 +1,14 @@
 /**
  * src/lib/scoringEngine.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Shared scoring constants and helpers for WIE2026 – The Cypher Trail.
+ * Scoring constants, helpers, and timer utilities for WIE2026 – The Cypher Trail.
  *
  * Consumed by:
+ *   - Round components (scoreRound1, scorePassFail, validate*, timers)
  *   - AdminPanel.jsx (ROUND_NAMES, ROUND_MAX_SCORES)
- *   - Round components (MAX_SCORE_* constants)
  */
+
+import { supabase } from './supabase.js';
 
 // ── Round identifier strings ──────────────────────────────────────────────────
 // These must match the `round` column values stored in Supabase `scores` table.
@@ -44,6 +46,104 @@ export const TOTAL_MAX_SCORE = Object.values(ROUND_MAX_SCORES).reduce(
 export function clampScore(roundName, raw) {
   const max = ROUND_MAX_SCORES[roundName] ?? Infinity;
   return Math.max(0, Math.min(raw, max));
+}
+
+/**
+ * ROUND 1 scoring: +1 per correct answer, 0 for wrong.
+ * Each answer tracked with attemptsUsed (1 or 2); scoring is same regardless
+ * of attempts (binary correct/wrong at end of quiz).
+ *
+ * @param {{ questionId: string|number, isCorrect: boolean, attemptsUsed: number }[]} answers
+ * @returns {number} total points (0–20)
+ */
+export function scoreRound1(answers) {
+  return answers.reduce((total, a) => total + (a.isCorrect ? 1 : 0), 0);
+}
+
+/**
+ * Pass/fail scoring for Rounds 2–5.
+ * @param {boolean} isCorrect
+ * @returns {10|0}
+ */
+export function scorePassFail(isCorrect) {
+  return isCorrect ? 10 : 0;
+}
+
+/**
+ * Validate Round 4 answer — case-insensitive, trimmed.
+ * Correct answer: "nebula"
+ * @param {string} input
+ * @returns {boolean}
+ */
+export function validateRound4Answer(input) {
+  return typeof input === 'string' && input.trim().toLowerCase() === 'nebula';
+}
+
+/**
+ * Validate Round 5 pass-code.
+ * Correct code: "5503"
+ * @param {string} input
+ * @returns {boolean}
+ */
+export function validateRound5Code(input) {
+  return typeof input === 'string' && input.trim() === '5503';
+}
+
+/**
+ * Calculate total score for a player by summing all round scores from the DB.
+ * @param {string} playerId
+ * @returns {Promise<number>}
+ */
+export async function calculateTotalScore(playerId) {
+  try {
+    const { data, error } = await supabase
+      .from('scores')
+      .select('score')
+      .eq('player_id', playerId);
+
+    if (error) throw error;
+    return (data ?? []).reduce((sum, row) => sum + (row.score ?? 0), 0);
+  } catch (err) {
+    console.error('[scoringEngine] calculateTotalScore failed:', err);
+    return 0;
+  }
+}
+
+// ── Timer utilities ───────────────────────────────────────────────────────────
+
+/**
+ * Start a wall-clock timer. Returns a stop function that returns elapsed seconds.
+ * Usage:
+ *   const stopTimer = startTimer();
+ *   // ... later:
+ *   const elapsedSecs = stopTimer();
+ *
+ * @returns {() => number} stop function → elapsed seconds (integer)
+ */
+export function startTimer() {
+  const t0 = Date.now();
+  return function stopTimer() {
+    return Math.round((Date.now() - t0) / 1000);
+  };
+}
+
+/**
+ * Start a per-question timer. Call startQuestionTimer() when a question is shown.
+ * Call the returned function when the player answers to get elapsed seconds.
+ * Identical to startTimer() — two named aliases for clarity.
+ *
+ * @returns {() => number}
+ */
+export function startQuestionTimer() {
+  return startTimer();
+}
+
+/**
+ * Start a round-level timer. Call startRoundTimer() when the round begins.
+ * @returns {() => number}
+ */
+export function startRoundTimer() {
+  return startTimer();
 }
 
 /**

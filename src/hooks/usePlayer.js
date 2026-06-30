@@ -2,17 +2,28 @@
  * src/hooks/usePlayer.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Custom hook that manages the full player session lifecycle for
- * WIE2026 – Crewmate Protocol.
+ * WIE2026 – The Cypher Trail.
+ *
+ * BUG FIX (duplicate sessions):
+ *   - Added `joiningRef` flag so the onAuthStateChange callback cannot
+ *     call joinGame() a second time while the first call is still in-flight
+ *     (covers React StrictMode double-invoke AND rapid duplicate auth events).
+ *   - The actual "reuse open session" guard lives in gameService.joinGame()
+ *     — it checks for a session row with logged_out_at IS NULL before
+ *     inserting a new one.
  *
  * Exposes:
  *   { player, sessionId, loading, error, join, leave, submitScore }
- *
- * Usage:
- *   const { player, join, leave, submitScore } = usePlayer();
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { joinGame, leaveGame, getStoredPlayer, recordScore, upsertPlayerFromAuth } from '../lib/gameService.js';
+import {
+  joinGame,
+  leaveGame,
+  getStoredPlayer,
+  recordScore,
+  upsertPlayerFromAuth,
+} from '../lib/gameService.js';
 import { onAuthChange } from '../lib/auth.js';
 
 export default function usePlayer() {
@@ -24,6 +35,10 @@ export default function usePlayer() {
   // Keep a ref to sessionId so the beforeunload listener always sees latest value
   const sessionRef = useRef(sessionId);
   useEffect(() => { sessionRef.current = sessionId; }, [sessionId]);
+
+  // FIX: flag that prevents joinGame() from being called more than once
+  // per mount cycle — covers StrictMode double-invoke and duplicate auth events.
+  const joiningRef = useRef(false);
 
   // ── Restore from localStorage on mount ────────────────────────────────────
   useEffect(() => {
@@ -43,14 +58,24 @@ export default function usePlayer() {
       const { player: storedPlayer } = getStoredPlayer();
       if (storedPlayer) return; // already have a player, nothing to do
 
+      // FIX: bail out if a joinGame() call is already in-flight
+      // This prevents StrictMode double-invoke and duplicate SIGNED_IN events
+      // from each creating their own session row.
+      if (joiningRef.current) return;
+      joiningRef.current = true;
+
       try {
         await upsertPlayerFromAuth(authUser);
+        // joinGame() now checks for an open session first (see gameService.js)
         const result = await joinGame(authUser);
         setPlayer(result.player);
         setSessionId(result.sessionId);
       } catch (err) {
         console.error('[usePlayer] auto-join from auth session failed:', err);
         // Non-fatal: the JoinGame screen will still show the Google button
+      } finally {
+        // Reset flag after the call completes so a genuine re-login later works
+        joiningRef.current = false;
       }
     });
     return unsubscribe;
@@ -75,10 +100,11 @@ export default function usePlayer() {
   // Accepts either:
   //   join(authUser)              — new Google OAuth flow (authUser.id is present)
   //   join(displayName, email)    — legacy manual flow (not used in new GameFlow)
-  const join = useCallback(async (authUserOrName, email) => {
+  const join = useCallback(async (authUserOrName) => {
     setLoading(true);
     setError(null);
     try {
+      // joinGame() internally reuses an open session if one exists
       const result = await joinGame(authUserOrName);
       setPlayer(result.player);
       setSessionId(result.sessionId);

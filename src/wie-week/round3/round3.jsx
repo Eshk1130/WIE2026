@@ -6,6 +6,12 @@ import crewGreen from '../round1/assets/crewmate_green.png';
 import crewRed from '../round1/assets/crewmate_red.png';
 import crewYellow from '../round1/assets/crewmate_yellow.png';
 
+// ADDED: scoring + player context
+import { useRef } from 'react';
+import { usePlayerContext } from '../../lib/PlayerContext.jsx';
+import { submitRoundScore } from '../../lib/gameService.js';
+import { scorePassFail, ROUND_NAMES, startRoundTimer } from '../../lib/scoringEngine.js';
+
 const ROUND3_STARS = (count) => Array.from({ length: count }, (_, i) => ({
   id: i,
   x: `${Math.random() * 100}%`,
@@ -78,6 +84,11 @@ export default function Round3({ onComplete }) {
   const [status, setStatus] = useState('idle');
   const [seq, setSeq] = useState([]);
   const [toastMsg, setToastMsg] = useState('');
+
+  // ADDED: player context + round timer
+  const { player, sessionId } = usePlayerContext();
+  const stopRoundTimerRef = useRef(startRoundTimer());
+
   const [crew] = useState(() => {
     const savedTeam = localStorage.getItem('team_players');
     if (savedTeam) {
@@ -128,9 +139,23 @@ export default function Round3({ onComplete }) {
     };
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (input.trim().toUpperCase() === HIDDEN_KEY.toUpperCase()) {
       setStatus('ok');
+      // ADDED: submit score on correct key
+      const timeSecs = stopRoundTimerRef.current();
+      if (player?.id && sessionId) {
+        try {
+          await submitRoundScore(player.id, sessionId, {
+            score: scorePassFail(true),
+            round: ROUND_NAMES.ROUND3,
+            time_taken_secs: timeSecs,
+            question_detail: [{ isCorrect: true, timeSpentSecs: timeSecs }],
+          });
+        } catch (err) {
+          console.error('[Round3] submitRoundScore failed:', err);
+        }
+      }
     } else {
       setStatus('err');
       setInput('');
